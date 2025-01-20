@@ -3,221 +3,294 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Enhanced RAG Engine</title>
+        <title>RAG Chatbot</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://unpkg.com/marked@4.0.0/marked.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.min.css">
-        <script src="https://unpkg.com/@popperjs/core@2"></script>
-        <script src="https://unpkg.com/tippy.js@6"></script>
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
         <style>
+        .dark {
+            color-scheme: dark;
+        }
+        
         .loader {
-            border: 3px solid #f3f3f3;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #3b82f6;
             border-radius: 50%;
-            border-top: 3px solid #3498db;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
+        
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to {transform: rotate(360deg);}
         }
-        .markdown-body pre {
-            background-color: #f6f8fa;
-            padding: 1rem;
-            border-radius: 0.375rem;
+
+        .code-block {
+            background: #282c34;
+            border-radius: 0.5rem;
             margin: 1rem 0;
         }
-        .markdown-body code {
-            font-family: monospace;
-            background-color: #f6f8fa;
-            padding: 0.2rem 0.4rem;
-            border-radius: 0.25rem;
+
+        .dark .code-block {
+            background: #1a1d23;
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .history-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .history-panel.open {
+            max-height: 500px;
         }
     </style>
     </head>
-    <body class="bg-gray-100 min-h-screen">
-        <div class="container mx-auto px-4 py-6">
-            <h1
-                class="text-3xl font-bold text-center text-blue-600 mb-8">Enhanced
-                RAG Engine</h1>
+    <body
+        class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+        <div class="container mx-auto px-4 py-8 max-w-3xl">
+            <!-- Header with theme toggle -->
+            <div class="flex justify-between items-center mb-8">
+                <h1
+                    class="text-2xl font-bold text-gray-800 dark:text-gray-100">RAG
+                    Chatbot</h1>
+                <button id="themeToggle"
+                    class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <svg class="w-6 h-6 dark:hidden" fill="currentColor"
+                        viewBox="0 0 20 20">
+                        <path
+                            d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                    <svg class="w-6 h-6 hidden dark:block text-yellow-500"
+                        fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                    </svg>
+                </button>
+            </div>
 
-            <!-- Query Section -->
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <div class="relative">
-                    <textarea id="queryInput"
-                        class="w-full border border-gray-300 p-4 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        rows="4"
-                        placeholder="Enter your question here..."
-                        data-tippy-content="Enter your DSA-related question here"></textarea>
-                    <button id="submitQuery"
-                        class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
-                        <span>Submit</span>
-                        <div class="loader hidden"></div>
-                    </button>
+            <!-- History Toggle -->
+            <button id="historyToggle"
+                class="mb-4 flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                Chat History
+            </button>
+
+            <!-- History Panel -->
+            <div id="historyPanel"
+                class="history-panel mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                <div id="historyContent" class="p-4 space-y-4">
+                    <!-- History items will be inserted here -->
                 </div>
             </div>
 
-            <!-- Response Section -->
-            <div id="responseSection" class="mt-8 hidden">
-                <div class="bg-white shadow-lg rounded-lg p-6">
-                    <h2
-                        class="text-2xl font-semibold text-green-600 mb-4">Response</h2>
-                    <div id="streamingResponse"
-                        class="markdown-body prose max-w-none"></div>
+            <!-- Chat container -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                <!-- Messages container -->
+                <div id="messages"
+                    class="p-4 space-y-4 min-h-[300px] max-h-[500px] overflow-y-auto">
+                    <!-- Messages will be inserted here -->
+                </div>
 
-                    <!-- Metadata Section -->
-                    <div class="mt-6 border-t pt-4">
-                        <h3
-                            class="text-lg font-semibold text-gray-700 mb-4">Analysis
-                            Metadata</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Confidence Score -->
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4
-                                    class="text-sm font-medium text-gray-600 mb-2">Confidence
-                                    Score</h4>
-                                <canvas id="confidenceChart" width="200"
-                                    height="100"></canvas>
-                            </div>
-                            <!-- Patterns -->
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4
-                                    class="text-sm font-medium text-gray-600 mb-2">Identified
-                                    Patterns</h4>
-                                <div id="patternsList" class="space-y-1"></div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Input form -->
+                <div class="border-t dark:border-gray-700 p-4">
+                    <form id="queryForm" class="flex gap-2">
+                        <input
+                            type="text"
+                            id="queryInput"
+                            class="flex-1 px-4 py-2 rounded-lg border dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                            placeholder="Type your question...">
+                        <button
+                            type="submit"
+                            class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center gap-2">
+                            <span>Send</span>
+                            <div class="loader hidden"></div>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
 
         <script>
-        // Initialize tooltips
-        tippy('[data-tippy-content]');
-
-        // Markdown configuration
-        marked.setOptions({
-            highlight: function(code, lang) {
-                return code;
-            }
-        });
-
-        let confidenceChart = null;
-
-        function updateConfidenceChart(confidence) {
-            if (confidenceChart) {
-                confidenceChart.destroy();
-            }
-
-            const ctx = document.getElementById('confidenceChart').getContext('2d');
-            confidenceChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Confidence', 'Remaining'],
-                    datasets: [{
-                        data: [confidence * 100, (1 - confidence) * 100],
-                        backgroundColor: ['#4CAF50', '#f0f0f0']
-                    }]
-                },
-                options: {
-                    cutout: '70%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+        // Theme toggle
+        const theme = {
+            init() {
+                if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
                 }
-            });
-        }
-
-        function updatePatternsList(patterns) {
-            const patternsDiv = document.getElementById('patternsList');
-            patternsDiv.innerHTML = patterns.map(pattern => 
-                `<div class="bg-blue-100 text-blue-800 px-2 py-1 rounded inline-block mr-2 mb-2">${pattern}</div>`
-            ).join('');
-        }
-
-        let controller = null;
-        document.getElementById("submitQuery").addEventListener("click", async () => {
-            const userInput = document.getElementById("queryInput").value;
-            if (!userInput) {
-                alert("Please enter a question.");
-                return;
-            }
-
-            // Cancel previous request if exists
-            if (controller) {
-                controller.abort();
-            }
-            controller = new AbortController();
-
-            const responseSection = document.getElementById("responseSection");
-            const streamingResponse = document.getElementById("streamingResponse");
-            const submitButton = document.getElementById("submitQuery");
-            const loader = submitButton.querySelector(".loader");
-
-            // Show loading state
-            submitButton.disabled = true;
-            loader.classList.remove("hidden");
-            streamingResponse.innerHTML = '';
-            responseSection.classList.remove("hidden");
-
-            try {
-                const response = await fetch("/stream", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ user_input: userInput }),
-                    signal: controller.signal
+                
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    document.documentElement.classList.toggle('dark');
+                    localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
                 });
+            }
+        };
 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = '';
+        // History panel
+        const history = {
+            panel: document.getElementById('historyPanel'),
+            content: document.getElementById('historyContent'),
+            toggle: document.getElementById('historyToggle'),
+            
+            init() {
+                this.toggle.addEventListener('click', () => {
+                    this.panel.classList.toggle('open');
+                    this.loadHistory();
+                });
+            },
 
-                while (true) {
-                    const {value, done} = await reader.read();
-                    if (done) break;
-                    
-                    buffer += decoder.decode(value, {stream: true});
-                    
-                    // Check for complete JSON objects
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop(); // Keep the incomplete line in the buffer
-                    
-                    for (const line of lines) {
-                        try {
-                            const data = JSON.parse(line);
-                            if (data.type === 'token') {
-                                streamingResponse.innerHTML = marked.parse(data.content);
-                            } else if (data.type === 'metadata') {
-                                updateConfidenceChart(data.metadata.average_confidence);
-                                updatePatternsList(data.metadata.pattern_types);
+            async loadHistory() {
+                try {
+                    const response = await fetch('/history');
+                    const data = await response.json();
+                    this.content.innerHTML = data.reverse().map(item => `
+                        <div class="border-b dark:border-gray-700 pb-2">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${item.user_input}</p>
+                            <p class="text-sm text-gray-800 dark:text-gray-200">${item.model_response.substring(0, 100)}...</p>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    console.error('Error loading history:', error);
+                }
+            }
+        };
+
+        // Chat functionality
+        const chat = {
+            messages: document.getElementById('messages'),
+            form: document.getElementById('queryForm'),
+            input: document.getElementById('queryInput'),
+            loader: document.querySelector('.loader'),
+            controller: null,
+
+            init() {
+                this.form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.sendMessage();
+                });
+            },
+
+            async sendMessage() {
+                const userInput = this.input.value.trim();
+                if (!userInput) return;
+
+                // Add user message
+                this.addMessage('user', userInput);
+                this.input.value = '';
+
+                // Show loader
+                const submitButton = this.form.querySelector('button');
+                submitButton.disabled = true;
+                this.loader.classList.remove('hidden');
+
+                // Cancel previous request if exists
+                if (this.controller) {
+                    this.controller.abort();
+                }
+                this.controller = new AbortController();
+
+                try {
+                    const response = await fetch("/stream", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ user_input: userInput }),
+                        signal: this.controller.signal
+                    });
+
+                    const botMessage = this.addMessage('bot', '');
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+
+                    while (true) {
+                        const {value, done} = await reader.read();
+                        if (done) break;
+                        
+                        buffer += decoder.decode(value, {stream: true});
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+
+                        for (const line of lines) {
+                            try {
+                                const data = JSON.parse(line);
+                                if (data.type === 'token') {
+                                    this.updateBotMessage(botMessage, data.content);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing JSON:', e);
                             }
-                        } catch (e) {
-                            console.error('Error parsing JSON:', e);
                         }
                     }
+
+                    // Highlight code blocks after complete response
+                    hljs.highlightAll();
+
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        console.error('Error:', error);
+                    }
+                } finally {
+                    submitButton.disabled = false;
+                    this.loader.classList.add('hidden');
+                    this.controller = null;
                 }
-            } catch (err) {
-                if (err.name === 'AbortError') {
-                    console.log('Request aborted');
+            },
+
+            addMessage(type, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `flex ${type === 'user' ? 'justify-end' : 'justify-start'}`;
+                
+                const bubble = document.createElement('div');
+                bubble.className = type === 'user' 
+                    ? 'bg-blue-500 text-white rounded-lg px-4 py-2 max-w-[80%]'
+                    : 'bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 max-w-[80%]';
+                
+                if (type === 'bot') {
+                    bubble.innerHTML = `<div class="message-content"></div>`;
                 } else {
-                    console.error('Error:', err);
-                    alert("Error fetching response.");
+                    bubble.textContent = content;
                 }
-            } finally {
-                submitButton.disabled = false;
-                loader.classList.add("hidden");
-                controller = null;
+
+                messageDiv.appendChild(bubble);
+                this.messages.appendChild(messageDiv);
+                this.messages.scrollTop = this.messages.scrollHeight;
+                return bubble;
+            },
+
+            updateBotMessage(messageElement, content) {
+                const contentDiv = messageElement.querySelector('.message-content');
+                let formattedContent = content;
+
+                // Detect and format code blocks
+                formattedContent = formattedContent.replace(
+                    /```(\w+)?\n([\s\S]*?)```/g,
+                    (_, lang, code) => `<div class="code-block"><pre><code class="${lang || ''}">${code.trim()}</code></pre></div>`
+                );
+
+                contentDiv.innerHTML = formattedContent;
+                this.messages.scrollTop = this.messages.scrollHeight;
             }
+        };
+
+        // Initialize all components
+        document.addEventListener('DOMContentLoaded', () => {
+            theme.init();
+            history.init();
+            chat.init();
         });
     </script>
     </body>
 </html>
---version 1.0.1
