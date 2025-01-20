@@ -76,7 +76,8 @@ class LeetCodeEmbedder:
             if embeddings.size > 0:
                 # Create and train HNSW index
                 print("Creating HNSW index...")
-                index = faiss.IndexFlatL2(self.dimension)
+                # 32 is the HNSW parameter (number of neighbors)
+                index = faiss.IndexHNSWFlat(self.dimension, 32)
 
                 # Add vectors to index
                 index.add(embeddings.astype(np.float32))
@@ -96,6 +97,4 @@ class LeetCodeEmbedder:
 
 if __name__ == "__main__":
     embedder = LeetCodeEmbedder()
-    embedder.load_and_embed_solutions(
-        "research/leetcode_solutions")
-# -v1 Flat index
+    embedder.load_and_embed_solutions("research/leetcode_solutions")
