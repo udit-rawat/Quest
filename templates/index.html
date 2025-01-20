@@ -6,7 +6,7 @@
         <title>RAG Chatbot</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
         <script
@@ -30,96 +30,110 @@
         }
 
         .code-block {
-            background: #282c34;
+            background: #24292e;
             border-radius: 0.5rem;
             margin: 1rem 0;
-        }
-
-        .dark .code-block {
-            background: #1a1d23;
+            position: relative;
         }
 
         .code-block pre {
             margin: 0;
             padding: 1rem;
+            overflow-x: auto;
         }
 
-        .history-panel {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
+        .code-block code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
 
-        .history-panel.open {
-            max-height: 500px;
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1d23;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
         }
     </style>
     </head>
     <body
         class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
-        <div class="container mx-auto px-4 py-8 max-w-3xl">
-            <!-- Header with theme toggle -->
-            <div class="flex justify-between items-center mb-8">
-                <h1
-                    class="text-2xl font-bold text-gray-800 dark:text-gray-100">RAG
-                    Chatbot</h1>
-                <button id="themeToggle"
-                    class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <svg class="w-6 h-6 dark:hidden" fill="currentColor"
-                        viewBox="0 0 20 20">
-                        <path
-                            d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                    </svg>
-                    <svg class="w-6 h-6 hidden dark:block text-yellow-500"
-                        fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
-                    </svg>
+        <div class="flex h-screen">
+            <!-- Sidebar -->
+            <div class="w-80 bg-gray-800 text-white p-4 flex flex-col">
+                <h2 class="text-xl font-semibold mb-4">Chat History</h2>
+                <div id="historyContent"
+                    class="flex-1 overflow-y-auto space-y-4">
+                    <!-- History items will be inserted here -->
+                </div>
+                <button id="clearHistory"
+                    class="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+                    Clear History
                 </button>
             </div>
 
-            <!-- History Toggle -->
-            <button id="historyToggle"
-                class="mb-4 flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-                Chat History
-            </button>
-
-            <!-- History Panel -->
-            <div id="historyPanel"
-                class="history-panel mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                <div id="historyContent" class="p-4 space-y-4">
-                    <!-- History items will be inserted here -->
-                </div>
-            </div>
-
-            <!-- Chat container -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                <!-- Messages container -->
-                <div id="messages"
-                    class="p-4 space-y-4 min-h-[300px] max-h-[500px] overflow-y-auto">
-                    <!-- Messages will be inserted here -->
-                </div>
-
-                <!-- Input form -->
-                <div class="border-t dark:border-gray-700 p-4">
-                    <form id="queryForm" class="flex gap-2">
-                        <input
-                            type="text"
-                            id="queryInput"
-                            class="flex-1 px-4 py-2 rounded-lg border dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                            placeholder="Type your question...">
-                        <button
-                            type="submit"
-                            class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center gap-2">
-                            <span>Send</span>
-                            <div class="loader hidden"></div>
+            <!-- Main Content -->
+            <div class="flex-1 flex flex-col">
+                <!-- Header -->
+                <header class="bg-white dark:bg-gray-800 shadow-sm p-4">
+                    <div
+                        class="max-w-5xl mx-auto flex justify-between items-center">
+                        <h1
+                            class="text-3xl font-bold text-center text-gray-800 dark:text-gray-100">RAG
+                            Chatbot</h1>
+                        <button id="themeToggle"
+                            class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+                            <svg class="w-6 h-6 dark:hidden" fill="currentColor"
+                                viewBox="0 0 20 20">
+                                <path
+                                    d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                            </svg>
+                            <svg
+                                class="w-6 h-6 hidden dark:block text-yellow-500"
+                                fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                            </svg>
                         </button>
-                    </form>
+                    </div>
+                </header>
+
+                <!-- Chat Container -->
+                <div class="flex-1 overflow-hidden">
+                    <div class="max-w-5xl mx-auto p-4 h-full flex flex-col">
+                        <!-- Messages container -->
+                        <div id="messages"
+                            class="flex-1 overflow-y-auto space-y-4 mb-4">
+                            <!-- Messages will be inserted here -->
+                        </div>
+
+                        <!-- Input form -->
+                        <form id="queryForm" class="flex gap-2">
+                            <input
+                                type="text"
+                                id="queryInput"
+                                class="flex-1 px-4 py-3 rounded-lg border dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                placeholder="Type your question...">
+                            <button
+                                type="submit"
+                                class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center gap-2">
+                                <span>Send</span>
+                                <div class="loader hidden"></div>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -139,35 +153,6 @@
             }
         };
 
-        // History panel
-        const history = {
-            panel: document.getElementById('historyPanel'),
-            content: document.getElementById('historyContent'),
-            toggle: document.getElementById('historyToggle'),
-            
-            init() {
-                this.toggle.addEventListener('click', () => {
-                    this.panel.classList.toggle('open');
-                    this.loadHistory();
-                });
-            },
-
-            async loadHistory() {
-                try {
-                    const response = await fetch('/history');
-                    const data = await response.json();
-                    this.content.innerHTML = data.reverse().map(item => `
-                        <div class="border-b dark:border-gray-700 pb-2">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">${item.user_input}</p>
-                            <p class="text-sm text-gray-800 dark:text-gray-200">${item.model_response.substring(0, 100)}...</p>
-                        </div>
-                    `).join('');
-                } catch (error) {
-                    console.error('Error loading history:', error);
-                }
-            }
-        };
-
         // Chat functionality
         const chat = {
             messages: document.getElementById('messages'),
@@ -181,6 +166,32 @@
                     e.preventDefault();
                     this.sendMessage();
                 });
+                
+                // Clear history button
+                document.getElementById('clearHistory').addEventListener('click', async () => {
+                    try {
+                        await fetch('/clear_history', { method: 'POST' });
+                        document.getElementById('historyContent').innerHTML = '';
+                        this.messages.innerHTML = '';
+                    } catch (error) {
+                        console.error('Error clearing history:', error);
+                    }
+                });
+            },
+
+            async loadHistory() {
+                try {
+                    const response = await fetch('/history');
+                    const data = await response.json();
+                    document.getElementById('historyContent').innerHTML = data.reverse().map(item => `
+                        <div class="border-b border-gray-700 pb-2">
+                            <p class="text-sm text-gray-400">${item.user_input}</p>
+                            <p class="text-sm text-gray-300">${item.model_response.substring(0, 100)}...</p>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    console.error('Error loading history:', error);
+                }
             },
 
             async sendMessage() {
@@ -228,12 +239,17 @@
                                 const data = JSON.parse(line);
                                 if (data.type === 'token') {
                                     this.updateBotMessage(botMessage, data.content);
+                                } else if (data.type === 'metadata') {
+                                    // Handle metadata if needed
                                 }
                             } catch (e) {
                                 console.error('Error parsing JSON:', e);
                             }
                         }
                     }
+
+                    // Refresh history after message
+                    this.loadHistory();
 
                     // Highlight code blocks after complete response
                     hljs.highlightAll();
@@ -274,10 +290,10 @@
                 const contentDiv = messageElement.querySelector('.message-content');
                 let formattedContent = content;
 
-                // Detect and format code blocks
+                // Format code blocks with syntax highlighting
                 formattedContent = formattedContent.replace(
                     /```(\w+)?\n([\s\S]*?)```/g,
-                    (_, lang, code) => `<div class="code-block"><pre><code class="${lang || ''}">${code.trim()}</code></pre></div>`
+                    (_, lang, code) => `<div class="code-block"><pre><code class="language-${lang || 'plaintext'}">${code.trim()}</code></pre></div>`
                 );
 
                 contentDiv.innerHTML = formattedContent;
@@ -285,12 +301,13 @@
             }
         };
 
-        // Initialize all components
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             theme.init();
-            history.init();
             chat.init();
+            chat.loadHistory();
         });
     </script>
     </body>
 </html>
+<!-- Normal Chatbot type of interface -->
