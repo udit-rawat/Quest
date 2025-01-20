@@ -105,4 +105,4 @@ def clear_history():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)  # --version2
+    app.run(debug=True)  # --version1
