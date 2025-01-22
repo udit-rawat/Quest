@@ -12,15 +12,15 @@
         <link
             href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
             rel="stylesheet">
-        <!-- Markdown-it for markdown rendering -->
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
-        <!-- Highlight.js for code syntax highlighting -->
+        <!-- Highlight.js for syntax highlighting -->
         <link
-            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css"
             rel="stylesheet">
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <!-- Markdown-it for markdown rendering -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
         <style>
         /* Custom CSS for theme variables */
         :root[data-theme="light"] {
@@ -30,6 +30,10 @@
             --text-secondary: #64748b;
             --border-color: #e2e8f0;
             --accent-color: #2563eb;
+            --header-bg: #2563eb;
+            --header-text: #ffffff;
+            --query-bg: var(--bg-secondary);
+            --query-text: var(--text-primary);
             --code-bg: #1e293b;
             --code-text: #e2e8f0;
         }
@@ -41,11 +45,68 @@
             --text-secondary: #94a3b8;
             --border-color: #334155;
             --accent-color: #60a5fa;
+            --header-bg: #1e293b;
+            --header-text: #e2e8f0;
+            --query-bg: var(--bg-secondary);
+            --query-text: var(--text-primary);
             --code-bg: #020617;
             --code-text: #e2e8f0;
         }
 
-        /* Loading Animation */
+        :root[data-theme="reasoning"] {
+            --bg-primary: #2d0404;
+            --bg-secondary: #460808;
+            --text-primary: #fde8e8;
+            --text-secondary: #fbd5d5;
+            --border-color: #742a2a;
+            --accent-color: #f05252;
+            --header-bg: #460808;
+            --header-text: #fde8e8;
+            --query-bg: var(--bg-secondary);
+            --query-text: var(--text-primary);
+            --code-bg: #1a0000;
+            --code-text: #fde8e8;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .chat-container {
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: var(--bg-primary);
+        }
+
+        .message {
+            max-width: 80%;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: var(--accent-color);
+            color: white;
+            margin-left: auto;
+        }
+
+        .assistant-message {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            margin-right: auto;
+        }
+
         .loading {
             display: inline-block;
             width: 20px;
@@ -60,219 +121,251 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Custom Bootstrap overrides */
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.7s, color 0.7s;
+        pre code {
+            background-color: var(--code-bg) !important;
+            color: var(--code-text) !important;
+            padding: 1em;
+            border-radius: 0.5em;
+            width: 100%;
+            display: block;
+            overflow-x: auto;
+            position: relative;
         }
 
-        .btn-primary {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
+        .copy-button {
+            display: none; /* Hide the copy button */
         }
 
-        .btn-primary:hover {
-            opacity: 0.9;
+        header {
+            background-color: var(--header-bg);
+            color: var(--header-text);
         }
 
         .form-control {
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
+            background-color: var(--query-bg);
+            color: var(--query-text);
             border-color: var(--border-color);
         }
 
         .form-control:focus {
+            background-color: var(--query-bg);
+            color: var(--query-text);
             border-color: var(--accent-color);
             box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
         }
 
-        .card {
-            background-color: var(--bg-secondary);
-            border-color: var(--border-color);
-        }
-
-        .code-section {
-            background-color: var(--code-bg);
-            color: var(--code-text);
+        .card-footer {
+            background-color: var(--bg-secondary) !important;
+            border-top: 1px solid var(--border-color) !important;
         }
     </style>
     </head>
     <body>
         <!-- Header -->
-        <header class="bg-[var(--bg-secondary)] shadow-sm py-4">
-            <div class="container text-center">
-                <h1
-                    class="text-2xl font-bold text-[var(--accent-color)]">Quest</h1>
+        <header class="py-4">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="h4 m-0">Quest</h1>
+                    <div class="d-flex gap-2">
+                        <button id="mode-toggle" onclick="toggleMode()"
+                            class="btn btn-outline-light d-flex align-items-center gap-2">
+                            <i id="mode-icon" class="bi bi-braces-asterisk"></i>
+                            <span id="mode-text">Normal</span>
+                        </button>
+                        <button id="theme-toggle" onclick="toggleTheme()"
+                            class="btn btn-outline-light">
+                            <i id="theme-icon" class="bi bi-sun"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <!-- Main Container -->
-        <div class="container my-5">
-            <!-- Search Section -->
-            <section class="card p-4 mb-4">
-                <form id="search-form" onsubmit="handleSubmit(event)"
-                    class="d-flex gap-3">
-                    <input
-                        type="text"
-                        name="query"
-                        id="query"
-                        class="form-control flex-grow-1"
-                        placeholder="Ask your programming question..."
-                        required>
-                    <button
-                        type="submit"
-                        id="submit-btn"
-                        class="btn btn-primary d-flex align-items-center gap-2">
-                        <i class="bi bi-arrow-up-right-circle"></i> Ask
-                    </button>
-                    <button
-                        id="mode-toggle"
-                        onclick="toggleMode()"
-                        class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                        <i id="mode-icon" class="bi bi-braces-asterisk"></i>
-                        <span id="mode-text">Normal</span>
-                    </button>
-                </form>
-            </section>
-
-            <!-- Results Section -->
-            <section id="results-section" class="card p-4 mb-4"
-                style="display: none;">
-                <div class="answer-content">
-                    <div class="markdown-content" id="response-content"></div>
+        <!-- Main Chat Container -->
+        <main class="container my-4">
+            <div class="chat-container card">
+                <div id="messages" class="messages-container"></div>
+                <div class="card-footer bg-transparent border-top-0 p-3">
+                    <form id="chat-form" class="d-flex gap-2">
+                        <textarea id="query" class="form-control"
+                            placeholder="Ask your programming question..."
+                            rows="1" required></textarea>
+                        <button type="submit" id="submit-btn"
+                            class="btn btn-primary d-flex align-items-center gap-2">
+                            <i class="bi bi-arrow-up-right-circle"></i> Ask
+                        </button>
+                        <button type="button" id="stop-btn"
+                            class="btn btn-danger d-flex align-items-center gap-2"
+                            style="display: none;">
+                            <i class="bi bi-stop-circle"></i> Stop
+                        </button>
+                    </form>
                 </div>
-                <div id="code-section"></div>
-            </section>
-        </div>
+            </div>
+        </main>
 
-        <!-- Theme Toggle Button -->
-        <button
-            id="theme-toggle"
-            onclick="toggleTheme()"
-            class="btn btn-primary position-fixed bottom-0 end-0 m-3 rounded-circle p-3">
-            <i id="theme-icon" class="bi bi-sun"></i>
-        </button>
-
-        <!-- Bootstrap JS CDN -->
-        <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Scripts -->
         <script>
         const md = window.markdownit();
-        let currentMode = 'general';
-        let currentTheme = 'light';
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let currentMode = localStorage.getItem('mode') || 'general';
+        let abortController = null;
+
+        // Set initial theme and mode
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon();
+        updateMode();
 
         // Function to toggle theme
         function toggleTheme() {
-            const html = document.documentElement;
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-            html.setAttribute('data-theme', currentTheme);
-            document.getElementById('theme-icon').className = 
-                currentTheme === 'light' ? 'bi bi-sun' : 'bi bi-moon';
+            const themes = ['light', 'dark', currentMode === 'reasoning' ? 'reasoning' : 'light'];
+            const currentIndex = themes.indexOf(currentTheme);
+            currentTheme = themes[(currentIndex + 1) % themes.length];
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeIcon();
+        }
+
+        // Function to update theme icon
+        function updateThemeIcon() {
+            const icon = document.getElementById('theme-icon');
+            icon.className = currentTheme === 'light' ? 'bi bi-sun' : 
+                           currentTheme === 'dark' ? 'bi bi-moon' : 
+                           'bi bi-circle-half';
         }
 
         // Function to toggle mode
         function toggleMode() {
             currentMode = currentMode === 'general' ? 'reasoning' : 'general';
-            document.getElementById('mode-text').textContent = 
-                currentMode === 'general' ? 'Normal' : 'Reasoning';
-            document.getElementById('mode-icon').className = 
-                currentMode === 'general' ? 'bi bi-braces-asterisk' : 'bi bi-tsunami';
+            localStorage.setItem('mode', currentMode);
+            updateMode();
         }
 
-        // Function to extract code blocks
-        function extractCodeBlocks(text) {
-            const blocks = [];
-            const regex = /```[\s\S]*?```/g;
-            const matches = text.match(regex) || [];
+        // Function to update mode
+        function updateMode() {
+            document.getElementById('mode-text').textContent = currentMode === 'general' ? 'Normal' : 'Reasoning';
+            document.getElementById('mode-icon').className = currentMode === 'general' ? 'bi bi-braces-asterisk' : 'bi bi-tsunami';
             
-            matches.forEach(block => {
-                blocks.push(block.replace(/```/g, '').trim());
-            });
+            if (currentMode === 'reasoning') {
+                document.documentElement.setAttribute('data-theme', 'reasoning');
+            } else {
+                document.documentElement.setAttribute('data-theme', currentTheme);
+            }
+        }
 
-            const textWithoutCode = text.replace(regex, '').trim();
-            return {
-                text: textWithoutCode,
-                codeBlocks: blocks
-            };
+        // Function to add a message to the chat
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+            
+            if (isUser) {
+                messageDiv.textContent = content;
+            } else {
+                messageDiv.innerHTML = md.render(content);
+                messageDiv.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block);
+                });
+            }
+            
+            document.getElementById('messages').appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: 'smooth' });
         }
 
         // Function to handle form submission
         async function handleSubmit(event) {
             event.preventDefault();
+            
             const query = document.getElementById('query').value;
             const submitBtn = document.getElementById('submit-btn');
-            const resultsSection = document.getElementById('results-section');
-            const responseContent = document.getElementById('response-content');
-            const codeSection = document.getElementById('code-section');
-
-            // Show loading state
-            submitBtn.innerHTML = '<div class="loading"></div>';
-            resultsSection.style.display = 'block';
-            responseContent.innerHTML = 'Thinking...';
-            codeSection.innerHTML = '';
-
+            const stopBtn = document.getElementById('stop-btn');
+            
+            if (!query.trim()) return;
+            
+            submitBtn.disabled = true;
+            stopBtn.style.display = 'inline-flex';
+            addMessage(query, true); // Add user's message to the chat
+            
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message assistant-message';
+            loadingMessage.innerHTML = '<div class="loading"></div>';
+            document.getElementById('messages').appendChild(loadingMessage);
+            
             try {
+                abortController = new AbortController();
                 const response = await fetch('/search', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        query: query,
+                        query: query.trim(),
                         mode: currentMode
-                    })
+                    }),
+                    signal: abortController.signal
                 });
 
-                if (response.ok) {
-                    const reader = response.body.getReader();
-                    let accumulatedResponse = '';
-
-                    while (true) {
-                        const {done, value} = await reader.read();
-                        if (done) break;
-                        
-                        const chunk = new TextDecoder().decode(value);
-                        accumulatedResponse += chunk;
-
-                        const {text, codeBlocks} = extractCodeBlocks(accumulatedResponse);
-                        responseContent.innerHTML = md.render(text);
-
-                        codeSection.innerHTML = codeBlocks.map((code, index) => `
-                            <div class="code-section mt-4">
-                                <div class="code-header d-flex justify-content-between align-items-center p-3 bg-dark text-white rounded-top">
-                                    <span>Solution ${index + 1}</span>
-                                    <div class="code-actions d-flex gap-2">
-                                        <button onclick="copyCode(${index})" <i class="bi bi-copy"></i></button>
-                                    </div>
-                                </div>
-                                <pre class="code-content p-3 bg-dark text-white rounded-bottom"><code id="code-${index}">${code}</code></pre>
-                            </div>
-                        `).join('');
-
-                        // Highlight code blocks
-                        document.querySelectorAll('pre code').forEach(block => {
-                            hljs.highlightBlock(block);
-                        });
-                    }
-                } else {
-                    responseContent.innerHTML = 'Error: Failed to get response';
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const reader = response.body.getReader();
+                let accumulatedResponse = '';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = new TextDecoder().decode(value);
+                    accumulatedResponse += chunk;
+                    
+                    // Update the loading message with the accumulated response
+                    loadingMessage.innerHTML = md.render(accumulatedResponse);
+                    
+                    // Highlight code blocks
+                    loadingMessage.querySelectorAll('pre code').forEach(block => {
+                        hljs.highlightElement(block);
+                    });
                 }
+                
+                // Remove the loading animation once the response is complete
+                loadingMessage.classList.remove('loading');
             } catch (error) {
-                responseContent.innerHTML = 'Error: ' + error.message;
+                if (error.name !== 'AbortError') {
+                    loadingMessage.innerHTML = `Error: ${error.message}`;
+                }
+            } finally {
+                submitBtn.disabled = false;
+                stopBtn.style.display = 'none';
+                abortController = null;
             }
-
-            // Reset button
-            submitBtn.innerHTML = '<i class="bi bi-arrow-up-right-circle"></i> Ask';
         }
 
-        // Function to copy code
-        function copyCode(index) {
-            const code = document.getElementById(`code-${index}`).textContent;
-            navigator.clipboard.writeText(code)
-                .then(() => alert('Code copied!'))
-                .catch(err => console.error('Failed to copy:', err));
+        // Function to stop the generation process
+        function stopGeneration() {
+            if (abortController) {
+                abortController.abort();
+                // Send a signal to the server to stop generation
+                fetch('/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ stop: true })
+                }).catch(err => console.error('Failed to send stop signal:', err));
+            }
         }
+
+        // Attach event listener to the form
+        document.getElementById('chat-form').addEventListener('submit', handleSubmit);
+
+        // Attach event listener to the stop button
+        document.getElementById('stop-btn').addEventListener('click', stopGeneration);
+
+        // Allow Shift+Enter for new lines in the query input
+        document.getElementById('query').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+            }
+        });
     </script>
     </body>
 </html>
