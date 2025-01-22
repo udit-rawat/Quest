@@ -6,6 +6,9 @@ app = Flask(__name__)
 retriever = LeetCodeRetriever()
 rag_engine = RAGEngine(retriever)
 
+# Global variable to control the streaming
+streaming = True
+
 
 @app.route('/')
 def index():
@@ -14,6 +17,9 @@ def index():
 
 @app.route('/search', methods=['POST'])
 def search():
+    global streaming
+    streaming = True  # Reset the streaming flag
+
     data = request.get_json()
     query = data.get('query')
     mode = data.get('mode', 'general')
@@ -29,14 +35,24 @@ def search():
             # Get response from RAG engine
             response, _ = rag_engine.answer_question(query)
 
-            # Stream the response
-            yield response
+            # Stream the response in chunks
+            for chunk in response:
+                if not streaming:
+                    break
+                yield chunk
 
         except Exception as e:
             app.logger.error(f"Error processing query: {str(e)}")
             yield "An error occurred while processing your request."
 
     return Response(stream_with_context(generate()), mimetype='text/plain')
+
+
+@app.route('/stop', methods=['POST'])
+def stop():
+    global streaming
+    streaming = False  # Stop the streaming
+    return Response('Streaming stopped', status=200)
 
 
 if __name__ == '__main__':
