@@ -1,313 +1,419 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>RAG Chatbot</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+        <title>Quest - Programming Assistant</title>
+        <!-- Add Markdown-it for markdown rendering -->
         <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+            src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
         <style>
-        .dark {
-            color-scheme: dark;
+        /* Theme Variables */
+        :root[data-theme="light"] {
+            --bg-primary: #f5f7fb;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-color: #2563eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
         }
-        
-        .loader {
+
+        :root[data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #60a5fa;
+            --code-bg: #020617;
+            --code-text: #e2e8f0;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Toggle Buttons */
+        .toggle-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-button:hover {
+            border-color: var(--accent-color);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .search-button {
+            padding: 1rem 2rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .search-button:hover {
+            opacity: 0.9;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .answer-content {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+
+        /* Code Section */
+        .code-section {
+            position: relative;
+            margin-top: 1.5rem;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .code-button {
+            padding: 0.25rem 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .code-content {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 0 0 8px 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Markdown Styles */
+        .markdown-content {
+            color: var(--text-primary);
+        }
+
+        .markdown-content h1, 
+        .markdown-content h2, 
+        .markdown-content h3 {
+            margin: 1.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        .markdown-content p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .markdown-content ul, 
+        .markdown-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .markdown-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
             width: 20px;
             height: 20px;
-            border: 2px solid #e2e8f0;
-            border-top-color: #3b82f6;
+            border: 3px solid var(--border-color);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            border-top-color: var(--accent-color);
+            animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
-            to {transform: rotate(360deg);}
+            to { transform: rotate(360deg); }
         }
 
-        .code-block {
-            background: #24292e;
-            border-radius: 0.5rem;
-            margin: 1rem 0;
-            position: relative;
-        }
-
-        .code-block pre {
-            margin: 0;
-            padding: 1rem;
-            overflow-x: auto;
-        }
-
-        .code-block code {
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #1a1d23;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #4a5568;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .search-container {
+                flex-direction: column;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
         }
     </style>
     </head>
-    <body
-        class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
-        <div class="flex h-screen">
-            <!-- Sidebar -->
-            <div class="w-80 bg-gray-800 text-white p-4 flex flex-col">
-                <h2 class="text-xl font-semibold mb-4">Chat History</h2>
-                <div id="historyContent"
-                    class="flex-1 overflow-y-auto space-y-4">
-                    <!-- History items will be inserted here -->
+    <body>
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Quest</h1>
                 </div>
-                <button id="clearHistory"
-                    class="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
-                    Clear History
-                </button>
-            </div>
-
-            <!-- Main Content -->
-            <div class="flex-1 flex flex-col">
-                <!-- Header -->
-                <header class="bg-white dark:bg-gray-800 shadow-sm p-4">
-                    <div
-                        class="max-w-5xl mx-auto flex justify-between items-center">
-                        <h1
-                            class="text-3xl font-bold text-center text-gray-800 dark:text-gray-100">RAG
-                            Chatbot</h1>
-                        <button id="themeToggle"
-                            class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
-                            <svg class="w-6 h-6 dark:hidden" fill="currentColor"
-                                viewBox="0 0 20 20">
-                                <path
-                                    d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                            </svg>
-                            <svg
-                                class="w-6 h-6 hidden dark:block text-yellow-500"
-                                fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </header>
-
-                <!-- Chat Container -->
-                <div class="flex-1 overflow-hidden">
-                    <div class="max-w-5xl mx-auto p-4 h-full flex flex-col">
-                        <!-- Messages container -->
-                        <div id="messages"
-                            class="flex-1 overflow-y-auto space-y-4 mb-4">
-                            <!-- Messages will be inserted here -->
-                        </div>
-
-                        <!-- Input form -->
-                        <form id="queryForm" class="flex gap-2">
-                            <input
-                                type="text"
-                                id="queryInput"
-                                class="flex-1 px-4 py-3 rounded-lg border dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                                placeholder="Type your question...">
-                            <button
-                                type="submit"
-                                class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center gap-2">
-                                <span>Send</span>
-                                <div class="loader hidden"></div>
-                            </button>
-                        </form>
-                    </div>
+                <div class="controls">
+                    <button class="toggle-button" onclick="toggleTheme()"
+                        id="theme-toggle">
+                        🌞 Light Mode
+                    </button>
+                    <button class="toggle-button" onclick="toggleMode()"
+                        id="mode-toggle">
+                        💭 Normal Mode
+                    </button>
                 </div>
             </div>
+        </header>
+
+        <div class="container">
+            <section class="search-section">
+                <form id="search-form" onsubmit="handleSubmit(event)">
+                    <div class="search-container">
+                        <input
+                            type="text"
+                            name="query"
+                            id="query"
+                            class="search-input"
+                            placeholder="Ask your programming question..."
+                            required>
+                        <button type="submit" class="search-button"
+                            id="submit-btn">Ask</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="results-section" id="results-section"
+                style="display: none;">
+                <div class="answer-content">
+                    <div class="markdown-content" id="response-content"></div>
+                </div>
+                <div id="code-section"></div>
+            </section>
         </div>
 
         <script>
-        // Theme toggle
-        const theme = {
-            init() {
-                if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark');
-                }
-                
-                document.getElementById('themeToggle').addEventListener('click', () => {
-                    document.documentElement.classList.toggle('dark');
-                    localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        const md = window.markdownit();
+        let currentMode = 'general';
+        let currentTheme = 'light';
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', currentTheme);
+            document.getElementById('theme-toggle').textContent = 
+                currentTheme === 'light' ? '🌞 Light Mode' : '🌙 Dark Mode';
+        }
+
+        function toggleMode() {
+            currentMode = currentMode === 'general' ? 'reasoning' : 'general';
+            document.getElementById('mode-toggle').textContent = 
+                currentMode === 'general' ? '💭 Normal Mode' : '🧠 Reasoning Mode';
+        }
+
+        function extractCodeBlocks(text) {
+            const blocks = [];
+            const regex = /```[\s\S]*?```/g;
+            const matches = text.match(regex) || [];
+            
+            matches.forEach(block => {
+                blocks.push(block.replace(/```/g, '').trim());
+            });
+
+            // Remove code blocks from original text
+            const textWithoutCode = text.replace(regex, '').trim();
+            
+            return {
+                text: textWithoutCode,
+                codeBlocks: blocks
+            };
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const query = document.getElementById('query').value;
+            const submitBtn = document.getElementById('submit-btn');
+            const resultsSection = document.getElementById('results-section');
+            const responseContent = document.getElementById('response-content');
+            const codeSection = document.getElementById('code-section');
+
+            // Show loading state
+            submitBtn.innerHTML = '<div class="loading"></div>';
+            resultsSection.style.display = 'block';
+            responseContent.innerHTML = 'Thinking...';
+            codeSection.innerHTML = '';
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        mode: currentMode
+                    })
                 });
-            }
-        };
 
-        // Chat functionality
-        const chat = {
-            messages: document.getElementById('messages'),
-            form: document.getElementById('queryForm'),
-            input: document.getElementById('queryInput'),
-            loader: document.querySelector('.loader'),
-            controller: null,
-
-            init() {
-                this.form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.sendMessage();
-                });
-                
-                // Clear history button
-                document.getElementById('clearHistory').addEventListener('click', async () => {
-                    try {
-                        await fetch('/clear_history', { method: 'POST' });
-                        document.getElementById('historyContent').innerHTML = '';
-                        this.messages.innerHTML = '';
-                    } catch (error) {
-                        console.error('Error clearing history:', error);
-                    }
-                });
-            },
-
-            async loadHistory() {
-                try {
-                    const response = await fetch('/history');
-                    const data = await response.json();
-                    document.getElementById('historyContent').innerHTML = data.reverse().map(item => `
-                        <div class="border-b border-gray-700 pb-2">
-                            <p class="text-sm text-gray-400">${item.user_input}</p>
-                            <p class="text-sm text-gray-300">${item.model_response.substring(0, 100)}...</p>
-                        </div>
-                    `).join('');
-                } catch (error) {
-                    console.error('Error loading history:', error);
-                }
-            },
-
-            async sendMessage() {
-                const userInput = this.input.value.trim();
-                if (!userInput) return;
-
-                // Add user message
-                this.addMessage('user', userInput);
-                this.input.value = '';
-
-                // Show loader
-                const submitButton = this.form.querySelector('button');
-                submitButton.disabled = true;
-                this.loader.classList.remove('hidden');
-
-                // Cancel previous request if exists
-                if (this.controller) {
-                    this.controller.abort();
-                }
-                this.controller = new AbortController();
-
-                try {
-                    const response = await fetch("/stream", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ user_input: userInput }),
-                        signal: this.controller.signal
-                    });
-
-                    const botMessage = this.addMessage('bot', '');
+                if (response.ok) {
                     const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    let buffer = '';
+                    let accumulatedResponse = '';
 
                     while (true) {
-                        const {value, done} = await reader.read();
+                        const {done, value} = await reader.read();
                         if (done) break;
                         
-                        buffer += decoder.decode(value, {stream: true});
-                        const lines = buffer.split('\n');
-                        buffer = lines.pop();
+                        // Convert the chunk to text
+                        const chunk = new TextDecoder().decode(value);
+                        accumulatedResponse += chunk;
 
-                        for (const line of lines) {
-                            try {
-                                const data = JSON.parse(line);
-                                if (data.type === 'token') {
-                                    this.updateBotMessage(botMessage, data.content);
-                                } else if (data.type === 'metadata') {
-                                    // Handle metadata if needed
-                                }
-                            } catch (e) {
-                                console.error('Error parsing JSON:', e);
-                            }
-                        }
+                        // Extract code blocks and text
+                        const {text, codeBlocks} = extractCodeBlocks(accumulatedResponse);
+
+                        // Render markdown text
+                        responseContent.innerHTML = md.render(text);
+
+                        // Render code blocks
+                        codeSection.innerHTML = codeBlocks.map((code, index) => `
+                            <div class="code-section">
+                                <div class="code-header">
+                                    <span>Solution ${index + 1}</span>
+                                    <div class="code-actions">
+                                        <button class="code-button" onclick="copyCode(${index})">Copy</button>
+                                    </div>
+                                </div>
+                                <pre class="code-content"><code id="code-${index}">${code}</code></pre>
+                            </div>
+                        `).join('');
                     }
-
-                    // Refresh history after message
-                    this.loadHistory();
-
-                    // Highlight code blocks after complete response
-                    hljs.highlightAll();
-
-                } catch (error) {
-                    if (error.name !== 'AbortError') {
-                        console.error('Error:', error);
-                    }
-                } finally {
-                    submitButton.disabled = false;
-                    this.loader.classList.add('hidden');
-                    this.controller = null;
-                }
-            },
-
-            addMessage(type, content) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `flex ${type === 'user' ? 'justify-end' : 'justify-start'}`;
-                
-                const bubble = document.createElement('div');
-                bubble.className = type === 'user' 
-                    ? 'bg-blue-500 text-white rounded-lg px-4 py-2 max-w-[80%]'
-                    : 'bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 max-w-[80%]';
-                
-                if (type === 'bot') {
-                    bubble.innerHTML = `<div class="message-content"></div>`;
                 } else {
-                    bubble.textContent = content;
+                    responseContent.innerHTML = 'Error: Failed to get response';
                 }
-
-                messageDiv.appendChild(bubble);
-                this.messages.appendChild(messageDiv);
-                this.messages.scrollTop = this.messages.scrollHeight;
-                return bubble;
-            },
-
-            updateBotMessage(messageElement, content) {
-                const contentDiv = messageElement.querySelector('.message-content');
-                let formattedContent = content;
-
-                // Format code blocks with syntax highlighting
-                formattedContent = formattedContent.replace(
-                    /```(\w+)?\n([\s\S]*?)```/g,
-                    (_, lang, code) => `<div class="code-block"><pre><code class="language-${lang || 'plaintext'}">${code.trim()}</code></pre></div>`
-                );
-
-                contentDiv.innerHTML = formattedContent;
-                this.messages.scrollTop = this.messages.scrollHeight;
+            } catch (error) {
+                responseContent.innerHTML = 'Error: ' + error.message;
             }
-        };
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            theme.init();
-            chat.init();
-            chat.loadHistory();
-        });
+            // Reset button
+            submitBtn.textContent = 'Ask';
+        }
+
+        function copyCode(index) {
+            const code = document.getElementById(`code-${index}`).textContent;
+            navigator.clipboard.writeText(code)
+                .then(() => alert('Code copied!'))
+                .catch(err => console.error('Failed to copy:', err));
+        }
     </script>
     </body>
 </html>
-<!-- Normal Chatbot type of interface -->
