@@ -4,11 +4,25 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Quest - Programming Assistant</title>
-        <!-- Add Markdown-it for markdown rendering -->
+        <!-- Bootstrap CSS CDN -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+        <!-- Bootstrap Icons CDN -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+            rel="stylesheet">
+        <!-- Markdown-it for markdown rendering -->
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
+        <!-- Highlight.js for code syntax highlighting -->
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css"
+            rel="stylesheet">
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
         <style>
-        /* Theme Variables */
+        /* Custom CSS for theme variables */
         :root[data-theme="light"] {
             --bg-primary: #f5f7fb;
             --bg-secondary: #ffffff;
@@ -31,200 +45,6 @@
             --code-text: #e2e8f0;
         }
 
-        /* Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        /* Header Styles */
-        .header {
-            background-color: var(--bg-secondary);
-            padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo h1 {
-            color: var(--accent-color);
-            font-size: 1.8rem;
-        }
-
-        .controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        /* Toggle Buttons */
-        .toggle-button {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-button:hover {
-            border-color: var(--accent-color);
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* Search Section */
-        .search-section {
-            background: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-        }
-
-        .search-container {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-
-        .search-button {
-            padding: 1rem 2rem;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .search-button:hover {
-            opacity: 0.9;
-        }
-
-        /* Results Section */
-        .results-section {
-            background: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-        }
-
-        .answer-content {
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-            color: var(--text-primary);
-        }
-
-        /* Code Section */
-        .code-section {
-            position: relative;
-            margin-top: 1.5rem;
-        }
-
-        .code-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem;
-            background: var(--code-bg);
-            color: var(--code-text);
-            border-radius: 8px 8px 0 0;
-        }
-
-        .code-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .code-button {
-            padding: 0.25rem 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        .code-content {
-            background: var(--code-bg);
-            color: var(--code-text);
-            padding: 1rem;
-            border-radius: 0 0 8px 8px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-        }
-
-        /* Markdown Styles */
-        .markdown-content {
-            color: var(--text-primary);
-        }
-
-        .markdown-content h1, 
-        .markdown-content h2, 
-        .markdown-content h3 {
-            margin: 1.5rem 0 1rem;
-            color: var(--text-primary);
-        }
-
-        .markdown-content p {
-            margin-bottom: 1rem;
-            line-height: 1.8;
-        }
-
-        .markdown-content ul, 
-        .markdown-content ol {
-            margin: 1rem 0;
-            padding-left: 2rem;
-        }
-
-        .markdown-content li {
-            margin-bottom: 0.5rem;
-        }
-
         /* Loading Animation */
         .loading {
             display: inline-block;
@@ -240,61 +60,84 @@
             to { transform: rotate(360deg); }
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            .search-container {
-                flex-direction: column;
-            }
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
+        /* Custom Bootstrap overrides */
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.7s, color 0.7s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .form-control {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .code-section {
+            background-color: var(--code-bg);
+            color: var(--code-text);
         }
     </style>
     </head>
     <body>
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <h1>Quest</h1>
-                </div>
-                <div class="controls">
-                    <button class="toggle-button" onclick="toggleTheme()"
-                        id="theme-toggle">
-                        🌞 Light Mode
-                    </button>
-                    <button class="toggle-button" onclick="toggleMode()"
-                        id="mode-toggle">
-                        💭 Normal Mode
-                    </button>
-                </div>
+        <!-- Header -->
+        <header class="bg-[var(--bg-secondary)] shadow-sm py-4">
+            <div class="container text-center">
+                <h1
+                    class="text-2xl font-bold text-[var(--accent-color)]">Quest</h1>
             </div>
         </header>
 
-        <div class="container">
-            <section class="search-section">
-                <form id="search-form" onsubmit="handleSubmit(event)">
-                    <div class="search-container">
-                        <input
-                            type="text"
-                            name="query"
-                            id="query"
-                            class="search-input"
-                            placeholder="Ask your programming question..."
-                            required>
-                        <button type="submit" class="search-button"
-                            id="submit-btn">Ask</button>
-                    </div>
+        <!-- Main Container -->
+        <div class="container my-5">
+            <!-- Search Section -->
+            <section class="card p-4 mb-4">
+                <form id="search-form" onsubmit="handleSubmit(event)"
+                    class="d-flex gap-3">
+                    <input
+                        type="text"
+                        name="query"
+                        id="query"
+                        class="form-control flex-grow-1"
+                        placeholder="Ask your programming question..."
+                        required>
+                    <button
+                        type="submit"
+                        id="submit-btn"
+                        class="btn btn-primary d-flex align-items-center gap-2">
+                        <i class="bi bi-arrow-up-right-circle"></i> Ask
+                    </button>
+                    <button
+                        id="mode-toggle"
+                        onclick="toggleMode()"
+                        class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                        <i id="mode-icon" class="bi bi-braces-asterisk"></i>
+                        <span id="mode-text">Normal</span>
+                    </button>
                 </form>
             </section>
 
-            <section class="results-section" id="results-section"
+            <!-- Results Section -->
+            <section id="results-section" class="card p-4 mb-4"
                 style="display: none;">
                 <div class="answer-content">
                     <div class="markdown-content" id="response-content"></div>
@@ -303,25 +146,41 @@
             </section>
         </div>
 
+        <!-- Theme Toggle Button -->
+        <button
+            id="theme-toggle"
+            onclick="toggleTheme()"
+            class="btn btn-primary position-fixed bottom-0 end-0 m-3 rounded-circle p-3">
+            <i id="theme-icon" class="bi bi-sun"></i>
+        </button>
+
+        <!-- Bootstrap JS CDN -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
         const md = window.markdownit();
         let currentMode = 'general';
         let currentTheme = 'light';
 
+        // Function to toggle theme
         function toggleTheme() {
             const html = document.documentElement;
             currentTheme = currentTheme === 'light' ? 'dark' : 'light';
             html.setAttribute('data-theme', currentTheme);
-            document.getElementById('theme-toggle').textContent = 
-                currentTheme === 'light' ? '🌞 Light Mode' : '🌙 Dark Mode';
+            document.getElementById('theme-icon').className = 
+                currentTheme === 'light' ? 'bi bi-sun' : 'bi bi-moon';
         }
 
+        // Function to toggle mode
         function toggleMode() {
             currentMode = currentMode === 'general' ? 'reasoning' : 'general';
-            document.getElementById('mode-toggle').textContent = 
-                currentMode === 'general' ? '💭 Normal Mode' : '🧠 Reasoning Mode';
+            document.getElementById('mode-text').textContent = 
+                currentMode === 'general' ? 'Normal' : 'Reasoning';
+            document.getElementById('mode-icon').className = 
+                currentMode === 'general' ? 'bi bi-braces-asterisk' : 'bi bi-tsunami';
         }
 
+        // Function to extract code blocks
         function extractCodeBlocks(text) {
             const blocks = [];
             const regex = /```[\s\S]*?```/g;
@@ -331,15 +190,14 @@
                 blocks.push(block.replace(/```/g, '').trim());
             });
 
-            // Remove code blocks from original text
             const textWithoutCode = text.replace(regex, '').trim();
-            
             return {
                 text: textWithoutCode,
                 codeBlocks: blocks
             };
         }
 
+        // Function to handle form submission
         async function handleSubmit(event) {
             event.preventDefault();
             const query = document.getElementById('query').value;
@@ -374,28 +232,28 @@
                         const {done, value} = await reader.read();
                         if (done) break;
                         
-                        // Convert the chunk to text
                         const chunk = new TextDecoder().decode(value);
                         accumulatedResponse += chunk;
 
-                        // Extract code blocks and text
                         const {text, codeBlocks} = extractCodeBlocks(accumulatedResponse);
-
-                        // Render markdown text
                         responseContent.innerHTML = md.render(text);
 
-                        // Render code blocks
                         codeSection.innerHTML = codeBlocks.map((code, index) => `
-                            <div class="code-section">
-                                <div class="code-header">
+                            <div class="code-section mt-4">
+                                <div class="code-header d-flex justify-content-between align-items-center p-3 bg-dark text-white rounded-top">
                                     <span>Solution ${index + 1}</span>
-                                    <div class="code-actions">
-                                        <button class="code-button" onclick="copyCode(${index})">Copy</button>
+                                    <div class="code-actions d-flex gap-2">
+                                        <button onclick="copyCode(${index})" <i class="bi bi-copy"></i></button>
                                     </div>
                                 </div>
-                                <pre class="code-content"><code id="code-${index}">${code}</code></pre>
+                                <pre class="code-content p-3 bg-dark text-white rounded-bottom"><code id="code-${index}">${code}</code></pre>
                             </div>
                         `).join('');
+
+                        // Highlight code blocks
+                        document.querySelectorAll('pre code').forEach(block => {
+                            hljs.highlightBlock(block);
+                        });
                     }
                 } else {
                     responseContent.innerHTML = 'Error: Failed to get response';
@@ -405,9 +263,10 @@
             }
 
             // Reset button
-            submitBtn.textContent = 'Ask';
+            submitBtn.innerHTML = '<i class="bi bi-arrow-up-right-circle"></i> Ask';
         }
 
+        // Function to copy code
         function copyCode(index) {
             const code = document.getElementById(`code-${index}`).textContent;
             navigator.clipboard.writeText(code)
