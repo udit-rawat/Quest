@@ -4,7 +4,9 @@ from typing import List, Tuple, Optional
 import requests
 import json
 import logging
+import time
 from src.DSAAssistant.components.doc_retriever import LeetCodeRetriever, Solution
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,6 +46,7 @@ class RAGEngine:
         self.confidence_threshold = confidence_threshold
         self.repeat_penalty = repeat_penalty
         self.num_thread = num_thread
+        self.stop_generation = False  # Flag to stop generation
         logger.info("RAG Engine initialized successfully.")
 
     def set_mode(self, mode: str):
@@ -52,6 +55,16 @@ class RAGEngine:
             raise ValueError("Mode must be 'general' or 'reasoning'.")
         self.mode = mode
         logger.info(f"Mode set to: {mode}")
+
+    def stop(self):
+        """Stop the ongoing generation process."""
+        self.stop_generation = True
+        logger.info("Generation process stopped.")
+
+    def reset(self):
+        """Reset the stop flag to allow new generations."""
+        self.stop_generation = False
+        logger.info("Generation process reset.")
 
     def extract_metadata(self, solutions: List[Solution]) -> ContextMetadata:
         """Extract metadata from retrieved solutions."""
@@ -196,6 +209,9 @@ Retrieved Solutions:
                     full_response = ""
                     for line in response.iter_lines():
                         if line:
+                            if self.stop_generation:
+                                logger.info("Generation stopped by user.")
+                                return full_response.strip()  # Return partial response
                             json_response = json.loads(line)
                             if 'response' in json_response:
                                 full_response += json_response['response']
@@ -228,6 +244,9 @@ Retrieved Solutions:
     ) -> Tuple[str, ContextMetadata]:
         """Answer a question using the enhanced RAG engine."""
         try:
+            # Reset the stop flag before starting a new generation
+            self.reset()
+
             # Retrieve relevant context
             retrieved_solutions = self.retriever.search(
                 query, k=k, return_scores=True)
@@ -264,22 +283,27 @@ if __name__ == "__main__":
     # Test General Mode
     rag_engine.set_mode("general")  # Set to general mode
     query = "What is pointer in C? Do not include code, just explain in simple points."
-    answer, metadata = rag_engine.answer_question(query, k=3)
 
-    print("\n[General Mode] Generated Answer:")
-    print(answer)
-    print("\n[General Mode] Context Metadata:")
-    print(f"Average Confidence: {metadata.average_confidence:.2f}")
-    print(f"Identified Patterns: {', '.join(metadata.pattern_types)}")
-    print(f"Edge Cases: {', '.join(metadata.edge_cases)}")
+    # Start the generation process in a separate thread
+    import threading
 
-    # Test Reasoning Mode
-    rag_engine.set_mode("reasoning")  # Set to reasoning mode
-    answer, metadata = rag_engine.answer_question(query, k=3)
+    def start_generation():
+        answer, metadata = rag_engine.answer_question(query, k=3)
+        print("\n[General Mode] Generated Answer:")
+        print(answer)
+        print("\n[General Mode] Context Metadata:")
+        print(f"Average Confidence: {metadata.average_confidence:.2f}")
+        print(f"Identified Patterns: {', '.join(metadata.pattern_types)}")
+        print(f"Edge Cases: {', '.join(metadata.edge_cases)}")
 
-    print("\n[Reasoning Mode] Generated Answer:")
-    print(answer)
-    print("\n[Reasoning Mode] Context Metadata:")
-    print(f"Average Confidence: {metadata.average_confidence:.2f}")
-    print(f"Identified Patterns: {', '.join(metadata.pattern_types)}")
-    print(f"Edge Cases: {', '.join(metadata.edge_cases)}")
+    # Start the generation process
+    generation_thread = threading.Thread(target=start_generation)
+    generation_thread.start()
+
+    # Simulate stopping the generation after 5 seconds
+    time.sleep(10)
+    rag_engine.stop()
+    print("\nGeneration stopped by user.")
+
+    # Wait for the generation thread to finish
+    generation_thread.join()
