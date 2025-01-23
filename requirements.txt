@@ -1,0 +1,46 @@
+# Web Scraping and Data Processing
+requests>=2.31.0
+pandas>=2.2.0
+numpy>=1.24.0
+tqdm>=4.66.0
+
+# ML/DL Framework
+torch>=2.2.0
+transformers>=4.37.0
+accelerate>=0.27.0
+datasets>=2.16.0
+evaluate>=0.4.0
+scikit-learn>=1.4.0
+
+
+
+# Development and Testing
+pytest>=7.4.0
+black>=24.1.0
+isort>=5.13.0
+flake8>=7.0.0
+mypy>=1.8.0
+jupyter>=1.0.0
+notebook>=7.0.0
+
+
+
+# GUI and Visualization
+streamlit>=1.31.0
+streamlit-ace>=0.1.1  # For code editor in Streamlit
+streamlit-extras>=0.4.0  # Additional Streamlit components
+plotly>=5.18.0  # For interactive visualizations
+altair>=5.2.0  # For declarative visualizations
+st-annotated-text>=4.0.0  # For text annotations
+flask>=2.1.0  # For web app
+
+#Retreival and Similarity
+faiss-cpu>=1.9.0.post1
+sentence-transformers>=3.3.1
+
+#caching and optimization
+flask-caching 
+gunicorn
+
+#additional UI components
+markdown 
