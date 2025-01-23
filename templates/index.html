@@ -22,143 +22,159 @@
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
         <style>
-        /* Custom CSS for theme variables */
-        :root[data-theme="light"] {
-            --bg-primary: #f5f7fb;
-            --bg-secondary: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --accent-color: #2563eb;
-            --header-bg: #2563eb;
-            --header-text: #ffffff;
-            --query-bg: var(--bg-secondary);
-            --query-text: var(--text-primary);
-            --code-bg: #1e293b;
-            --code-text: #e2e8f0;
-        }
+            /* Custom CSS for theme variables */
+            :root[data-theme="light"] {
+                --bg-primary: #f5f7fb;
+                --bg-secondary: #ffffff;
+                --text-primary: #1e293b;
+                --text-secondary: #64748b;
+                --border-color: #e2e8f0;
+                --accent-color: #2563eb;
+                --header-bg: #2563eb;
+                --header-text: #ffffff;
+                --query-bg: var(--bg-secondary);
+                --query-text: var(--text-primary);
+                --code-bg: #1e293b;
+                --code-text: #e2e8f0;
+            }
 
-        :root[data-theme="dark"] {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --text-primary: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --border-color: #334155;
-            --accent-color: #60a5fa;
-            --header-bg: #1e293b;
-            --header-text: #e2e8f0;
-            --query-bg: var(--bg-secondary);
-            --query-text: var(--text-primary);
-            --code-bg: #020617;
-            --code-text: #e2e8f0;
-        }
+            :root[data-theme="dark"] {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --text-primary: #e2e8f0;
+                --text-secondary: #94a3b8;
+                --border-color: #334155;
+                --accent-color: #60a5fa;
+                --header-bg: #1e293b;
+                --header-text: #e2e8f0;
+                --query-bg: var(--bg-secondary);
+                --query-text: var(--text-primary);
+                --code-bg: #020617;
+                --code-text: #e2e8f0;
+            }
 
-        :root[data-theme="reasoning"] {
-            --bg-primary: #2d0404;
-            --bg-secondary: #460808;
-            --text-primary: #fde8e8;
-            --text-secondary: #fbd5d5;
-            --border-color: #742a2a;
-            --accent-color: #f05252;
-            --header-bg: #460808;
-            --header-text: #fde8e8;
-            --query-bg: var(--bg-secondary);
-            --query-text: var(--text-primary);
-            --code-bg: #1a0000;
-            --code-text: #fde8e8;
-        }
+            :root[data-theme="reasoning"] {
+                --bg-primary: #2d0404;
+                --bg-secondary: #460808;
+                --text-primary: #fde8e8;
+                --text-secondary: #fbd5d5;
+                --border-color: #742a2a;
+                --accent-color: #f05252;
+                --header-bg: #460808;
+                --header-text: #fde8e8;
+                --query-bg: var(--bg-secondary);
+                --query-text: var(--text-primary);
+                --code-bg: #1a0000;
+                --code-text: #fde8e8;
+            }
 
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
+            body {
+                background-color: var(--bg-primary);
+                color: var(--text-primary);
+                transition: background-color 0.3s, color 0.3s;
+            }
 
-        .chat-container {
-            height: calc(100vh - 120px);
-            display: flex;
-            flex-direction: column;
-        }
+            .chat-container {
+                height: calc(100vh - 120px);
+                display: flex;
+                flex-direction: column;
+            }
 
-        .messages-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 1rem;
-            background-color: var(--bg-primary);
-        }
+            .messages-container {
+                flex-grow: 1;
+                overflow-y: auto;
+                padding: 1rem;
+                background-color: var(--bg-primary);
+            }
 
-        .message {
-            max-width: 80%;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            border-radius: 1rem;
-            word-wrap: break-word;
-        }
+            .message {
+                max-width: 80%;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                border-radius: 1rem;
+                word-wrap: break-word;
+            }
 
-        .user-message {
-            background-color: var(--accent-color);
-            color: white;
-            margin-left: auto;
-        }
+            .user-message {
+                background-color: var(--accent-color);
+                color: white;
+                margin-left: auto;
+            }
 
-        .assistant-message {
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            margin-right: auto;
-        }
+            .assistant-message {
+                background-color: var(--bg-secondary);
+                color: var(--text-primary);
+                margin-right: auto;
+            }
 
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--border-color);
-            border-radius: 50%;
-            border-top-color: var(--accent-color);
-            animation: spin 1s linear infinite;
-        }
+            .loading {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 3px solid var(--border-color);
+                border-radius: 50%;
+                border-top-color: var(--accent-color);
+                animation: spin 1s linear infinite;
+            }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
 
-        pre code {
-            background-color: var(--code-bg) !important;
-            color: var(--code-text) !important;
-            padding: 1em;
-            border-radius: 0.5em;
-            width: 100%;
-            display: block;
-            overflow-x: auto;
-            position: relative;
-        }
+            pre code {
+                background-color: var(--code-bg) !important;
+                color: var(--code-text) !important;
+                padding: 1em;
+                border-radius: 0.5em;
+                width: 100%;
+                display: block;
+                overflow-x: auto;
+                position: relative;
+            }
 
-        .copy-button {
-            display: none; /* Hide the copy button */
-        }
+            .copy-button {
+                position: absolute;
+                top: 0.5em;
+                right: 0.5em;
+                background-color: var(--accent-color);
+                color: white;
+                border: none;
+                border-radius: 0.25em;
+                padding: 0.25em 0.5em;
+                cursor: pointer;
+                font-size: 0.8em;
+                transition: opacity 0.3s;
+            }
 
-        header {
-            background-color: var(--header-bg);
-            color: var(--header-text);
-        }
+            .copy-button:hover {
+                opacity: 0.8;
+            }
 
-        .form-control {
-            background-color: var(--query-bg);
-            color: var(--query-text);
-            border-color: var(--border-color);
-        }
+            header {
+                background-color: var(--header-bg);
+                color: var(--header-text);
+            }
 
-        .form-control:focus {
-            background-color: var(--query-bg);
-            color: var(--query-text);
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
-        }
+            .form-control {
+                background-color: var(--query-bg);
+                color: var(--query-text);
+                border-color: var(--border-color);
+                resize: none; /* Disable manual resizing */
+                overflow: hidden; /* Hide scrollbar */
+            }
 
-        .card-footer {
-            background-color: var(--bg-secondary) !important;
-            border-top: 1px solid var(--border-color) !important;
-        }
-    </style>
+            .form-control:focus {
+                background-color: var(--query-bg);
+                color: var(--query-text);
+                border-color: var(--accent-color);
+                box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+            }
+
+            .card-footer {
+                background-color: var(--bg-secondary) !important;
+                border-top: 1px solid var(--border-color) !important;
+            }
+        </style>
     </head>
     <body>
         <!-- Header -->
@@ -186,19 +202,25 @@
             <div class="chat-container card">
                 <div id="messages" class="messages-container"></div>
                 <div class="card-footer bg-transparent border-top-0 p-3">
-                    <form id="chat-form" class="d-flex gap-2">
-                        <textarea id="query" class="form-control"
-                            placeholder="Ask your programming question..."
-                            rows="1" required></textarea>
-                        <button type="submit" id="submit-btn"
-                            class="btn btn-primary d-flex align-items-center gap-2">
-                            <i class="bi bi-arrow-up-right-circle"></i> Ask
-                        </button>
-                        <button type="button" id="stop-btn"
-                            class="btn btn-danger d-flex align-items-center gap-2"
-                            style="display: none;">
-                            <i class="bi bi-stop-circle"></i> Stop
-                        </button>
+                    <form id="chat-form" class="d-flex gap-2 align-items-end">
+                        <!-- Wrapper for textarea to allow it to grow -->
+                        <div style="flex-grow: 1; position: relative;">
+                            <textarea id="query" class="form-control" rows="1"
+                                required></textarea>
+                        </div>
+                        <!-- Buttons container to keep them fixed in size -->
+                        <div
+                            style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                            <button type="submit" id="submit-btn"
+                                class="btn btn-primary d-flex align-items-center gap-2">
+                                <i class="bi bi-arrow-up-right-circle"></i>
+                            </button>
+                            <button type="button" id="stop-btn"
+                                class="btn btn-danger d-flex align-items-center gap-2"
+                                style="display: none;">
+                                <i class="bi bi-stop-circle"></i>
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -206,166 +228,243 @@
 
         <!-- Scripts -->
         <script>
-        const md = window.markdownit();
-        let currentTheme = localStorage.getItem('theme') || 'light';
-        let currentMode = localStorage.getItem('mode') || 'general';
-        let abortController = null;
+            const md = window.markdownit();
+            let currentTheme = localStorage.getItem('theme') || 'light';
+            let currentMode = localStorage.getItem('mode') || 'general';
+            let abortController = null;
 
-        // Set initial theme and mode
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        updateThemeIcon();
-        updateMode();
-
-        // Function to toggle theme
-        function toggleTheme() {
-            const themes = ['light', 'dark', currentMode === 'reasoning' ? 'reasoning' : 'light'];
-            const currentIndex = themes.indexOf(currentTheme);
-            currentTheme = themes[(currentIndex + 1) % themes.length];
+            // Set initial theme and mode
             document.documentElement.setAttribute('data-theme', currentTheme);
-            localStorage.setItem('theme', currentTheme);
             updateThemeIcon();
-        }
-
-        // Function to update theme icon
-        function updateThemeIcon() {
-            const icon = document.getElementById('theme-icon');
-            icon.className = currentTheme === 'light' ? 'bi bi-sun' : 
-                           currentTheme === 'dark' ? 'bi bi-moon' : 
-                           'bi bi-circle-half';
-        }
-
-        // Function to toggle mode
-        function toggleMode() {
-            currentMode = currentMode === 'general' ? 'reasoning' : 'general';
-            localStorage.setItem('mode', currentMode);
             updateMode();
-        }
 
-        // Function to update mode
-        function updateMode() {
-            document.getElementById('mode-text').textContent = currentMode === 'general' ? 'Normal' : 'Reasoning';
-            document.getElementById('mode-icon').className = currentMode === 'general' ? 'bi bi-braces-asterisk' : 'bi bi-tsunami';
-            
-            if (currentMode === 'reasoning') {
-                document.documentElement.setAttribute('data-theme', 'reasoning');
-            } else {
+            // Function to toggle theme
+            function toggleTheme() {
+                const themes = ['light', 'dark', currentMode === 'reasoning' ? 'reasoning' : 'light'];
+                const currentIndex = themes.indexOf(currentTheme);
+                currentTheme = themes[(currentIndex + 1) % themes.length];
                 document.documentElement.setAttribute('data-theme', currentTheme);
+                localStorage.setItem('theme', currentTheme);
+                updateThemeIcon();
             }
-        }
 
-        // Function to add a message to the chat
-        function addMessage(content, isUser = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
-            
-            if (isUser) {
-                messageDiv.textContent = content;
-            } else {
-                messageDiv.innerHTML = md.render(content);
-                messageDiv.querySelectorAll('pre code').forEach(block => {
-                    hljs.highlightElement(block);
-                });
+            // Function to update theme icon
+            function updateThemeIcon() {
+                const icon = document.getElementById('theme-icon');
+                icon.className = currentTheme === 'light' ? 'bi bi-sun' : 
+                               currentTheme === 'dark' ? 'bi bi-moon' : 
+                               'bi bi-circle-half';
             }
-            
-            document.getElementById('messages').appendChild(messageDiv);
-            messageDiv.scrollIntoView({ behavior: 'smooth' });
-        }
 
-        // Function to handle form submission
-        async function handleSubmit(event) {
-            event.preventDefault();
-            
-            const query = document.getElementById('query').value;
-            const submitBtn = document.getElementById('submit-btn');
-            const stopBtn = document.getElementById('stop-btn');
-            
-            if (!query.trim()) return;
-            
-            submitBtn.disabled = true;
-            stopBtn.style.display = 'inline-flex';
-            addMessage(query, true); // Add user's message to the chat
-            
-            const loadingMessage = document.createElement('div');
-            loadingMessage.className = 'message assistant-message';
-            loadingMessage.innerHTML = '<div class="loading"></div>';
-            document.getElementById('messages').appendChild(loadingMessage);
-            
-            try {
-                abortController = new AbortController();
-                const response = await fetch('/search', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        query: query.trim(),
-                        mode: currentMode
-                    }),
-                    signal: abortController.signal
-                });
+            // Function to toggle mode
+            function toggleMode() {
+                currentMode = currentMode === 'general' ? 'reasoning' : 'general';
+                localStorage.setItem('mode', currentMode);
+                updateMode();
+            }
 
-                if (!response.ok) throw new Error('Network response was not ok');
+            // Function to update mode
+            function updateMode() {
+                document.getElementById('mode-text').textContent = currentMode === 'general' ? 'Normal' : 'Reasoning';
+                document.getElementById('mode-icon').className = currentMode === 'general' ? 'bi bi-braces-asterisk' : 'bi bi-tsunami';
                 
-                const reader = response.body.getReader();
-                let accumulatedResponse = '';
+                if (currentMode === 'reasoning') {
+                    document.documentElement.setAttribute('data-theme', 'reasoning');
+                } else {
+                    document.documentElement.setAttribute('data-theme', currentTheme);
+                }
+            }
+
+            // Function to add a message to the chat
+            function addMessage(content, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
                 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    
-                    const chunk = new TextDecoder().decode(value);
-                    accumulatedResponse += chunk;
-                    
-                    // Update the loading message with the accumulated response
-                    loadingMessage.innerHTML = md.render(accumulatedResponse);
-                    
-                    // Highlight code blocks
-                    loadingMessage.querySelectorAll('pre code').forEach(block => {
+                if (isUser) {
+                    messageDiv.textContent = content;
+                } else {
+                    messageDiv.innerHTML = md.render(content);
+                    messageDiv.querySelectorAll('pre code').forEach(block => {
                         hljs.highlightElement(block);
+
+                        // Add a copy button to each code block
+                        const copyButton = document.createElement('button');
+                        copyButton.className = 'copy-button';
+                        copyButton.textContent = 'Copy';
+                        copyButton.onclick = () => copyToClipboard(block);
+                        block.parentElement.style.position = 'relative';
+                        block.parentElement.appendChild(copyButton);
                     });
                 }
                 
-                // Remove the loading animation once the response is complete
-                loadingMessage.classList.remove('loading');
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    loadingMessage.innerHTML = `Error: ${error.message}`;
+                document.getElementById('messages').appendChild(messageDiv);
+                messageDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            function copyToClipboard(codeBlock) {
+                const text = codeBlock.textContent;
+                if (navigator.clipboard) {
+                    // Use the modern clipboard API
+                    navigator.clipboard.writeText(text)
+                        .then(() => {
+                            alert('Code copied to clipboard!');
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy text: ', err);
+                        });
+                } else {
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        alert('Code copied to clipboard!');
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                    }
+                    document.body.removeChild(textarea);
                 }
-            } finally {
-                submitBtn.disabled = false;
-                stopBtn.style.display = 'none';
-                abortController = null;
             }
-        }
 
-        // Function to stop the generation process
-        function stopGeneration() {
-            if (abortController) {
-                abortController.abort();
-                // Send a signal to the server to stop generation
-                fetch('/stop', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ stop: true })
-                }).catch(err => console.error('Failed to send stop signal:', err));
-            }
-        }
-
-        // Attach event listener to the form
-        document.getElementById('chat-form').addEventListener('submit', handleSubmit);
-
-        // Attach event listener to the stop button
-        document.getElementById('stop-btn').addEventListener('click', stopGeneration);
-
-        // Allow Shift+Enter for new lines in the query input
-        document.getElementById('query').addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
+            // Function to handle form submission
+            async function handleSubmit(event) {
                 event.preventDefault();
-                document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+                
+                const query = document.getElementById('query').value;
+                const submitBtn = document.getElementById('submit-btn');
+                const stopBtn = document.getElementById('stop-btn');
+                
+                if (!query.trim()) return;
+                
+                submitBtn.disabled = true;
+                stopBtn.style.display = 'inline-flex';
+                addMessage(query, true); // Add user's message to the chat
+                
+                const loadingMessage = document.createElement('div');
+                loadingMessage.className = 'message assistant-message';
+                loadingMessage.innerHTML = '<div class="loading"></div>';
+                document.getElementById('messages').appendChild(loadingMessage);
+                
+                try {
+                    abortController = new AbortController();
+                    const response = await fetch('/search', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            query: query.trim(),
+                            mode: currentMode
+                        }),
+                        signal: abortController.signal
+                    });
+
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    
+                    const reader = response.body.getReader();
+                    let accumulatedResponse = '';
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = new TextDecoder().decode(value);
+                        accumulatedResponse += chunk;
+                        
+                        // Update the loading message with the accumulated response
+                        loadingMessage.innerHTML = md.render(accumulatedResponse);
+                        
+                        // Highlight code blocks
+                        loadingMessage.querySelectorAll('pre code').forEach(block => {
+                            hljs.highlightElement(block);
+                        });
+                    }
+                    
+                    // Remove the loading animation once the response is complete
+                    loadingMessage.classList.remove('loading');
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        // Handle the abort error specifically
+                        console.log('Request aborted by the user');
+                        loadingMessage.innerHTML = 'Generation stopped by the user.';
+                    } else {
+                        // Handle other errors
+                        loadingMessage.innerHTML = `Error: ${error.message}`;
+                    }
+                } finally {
+                    submitBtn.disabled = false;
+                    stopBtn.style.display = 'none';
+                    abortController = null;
+
+                    // Clear the query textarea after submission
+                    document.getElementById('query').value = '';
+                    autoExpand(document.getElementById('query')); // Reset the height of the textarea
+                }
             }
-        });
-    </script>
+
+            // Function to stop the generation process
+            function stopGeneration() {
+                if (abortController) {
+                    // Abort the ongoing request
+                    abortController.abort();
+
+                    // Send a signal to the backend to stop generation
+                    fetch('/stop', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ stop: true })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to send stop signal to the backend');
+                        }
+                        console.log('Stop signal sent successfully');
+                    })
+                    .catch(err => {
+                        console.error('Failed to send stop signal:', err);
+                    });
+
+                    // Update the UI
+                    document.getElementById('stop-btn').style.display = 'none'; // Hide the Stop button
+                    document.getElementById('submit-btn').disabled = false; // Re-enable the Submit button
+
+                    // Optionally, display a message to the user
+                    const loadingMessage = document.querySelector('.loading');
+                    if (loadingMessage) {
+                        loadingMessage.innerHTML = 'Generation stopped by the user.';
+                    }
+                }
+            }
+            // Function to auto-expand the textarea based on its content
+            function autoExpand(textarea) {
+                textarea.style.height = 'auto'; // Reset height to auto to recalculate
+                textarea.style.height = textarea.scrollHeight + 'px'; // Set height to scrollHeight
+            }
+
+            // Attach event listener to the form
+            document.getElementById('chat-form').addEventListener('submit', handleSubmit);
+
+            // Attach event listener to the stop button
+            document.getElementById('stop-btn').addEventListener('click', stopGeneration);
+
+            // Allow Shift+Enter for new lines in the query input
+            document.getElementById('query').addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+                }
+            });
+
+            // Attach event listener to the textarea for input events
+            const queryTextarea = document.getElementById('query');
+            queryTextarea.addEventListener('input', () => autoExpand(queryTextarea));
+
+            // Initialize the textarea height on page load
+            autoExpand(queryTextarea);
+        </script>
     </body>
 </html>
