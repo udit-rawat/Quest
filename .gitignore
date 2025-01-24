@@ -1,0 +1,33 @@
+# Virtual environment
+.venv/
+#file
+research/leetcode_solutions/
+#index and local experimental models
+research/leetcode_hnsw_optimal.index
+research/leetcode_hnsw.index
+research/leetcode_metadata_optimal.pkl
+research/leetcode_metadata.pkl
+
+# System-specific files
+.DS_Store
+.python-version
+
+# Python generated files
+__pycache__/
+
+
+# Local configuration files
+pyproject.toml
+uv.lock
+
+# Temporary or local development files
+chat_histories/
+assets/
+research/.DS_Store
+research/__pycache__/
+
+#init py
+src/DSAAssistant/components/__init__.py
+src/DSAAssistant/__init__.py
+#temporarily files
+templates/index-2.html
