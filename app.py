@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, Response, stream_with_context
-from src.DSAAssistant.components.doc_retriever import LeetCodeRetriever, Solution
-from rag_engine import RAGEngine
+from src.DSAAssistant.components.retriever2 import LeetCodeRetriever, Solution
+from Version1Components.rag_engine import RAGEngine
 
 app = Flask(__name__)
 retriever = LeetCodeRetriever()
