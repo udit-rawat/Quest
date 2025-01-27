@@ -86,12 +86,33 @@ class RAGEngine:
         self.stop_generation = False
         logger.info("Generation process reset.")
 
+    # def generate_enhanced_prompt(self, query: str, context: List[Solution]) -> str:
+    #     """Generate a structured prompt incorporating context."""
+    #     if self.mode == "reasoning":
+    #         return PromptTemplates.reasoning_prompt(query, context)
+    #     else:
+    #         return PromptTemplates.general_prompt(query, context)
+
     def generate_enhanced_prompt(self, query: str, context: List[Solution]) -> str:
-        """Generate a structured prompt incorporating context."""
+        """Generate a structured prompt incorporating context and conversation history."""
+        # Retrieve the conversation history
+        history_context = self.conversation_history.get_context()
+
+        # Generate the base prompt based on the mode
         if self.mode == "reasoning":
-            return PromptTemplates.reasoning_prompt(query, context)
+            base_prompt = PromptTemplates.reasoning_prompt(query, context)
         else:
-            return PromptTemplates.general_prompt(query, context)
+            base_prompt = PromptTemplates.general_prompt(query, context)
+
+        # Enhance the prompt with conversation history
+        enhanced_prompt = (
+            f"Conversation History:\n{history_context}\n\n"
+            f"Query: {query}\n\n"
+            f"Context: {context}\n\n"
+            f"Instruction: {base_prompt}"
+        )
+
+        return enhanced_prompt
 
     def call_ollama(self, prompt: str) -> str:
         """Send a prompt to the Ollama API with error handling."""
@@ -195,10 +216,11 @@ class RAGEngine:
 if __name__ == "__main__":
     # Initialize the RAG engine with the improved reasoning prompt
     retriever = LeetCodeRetriever()
-    rag_engine = RAGEngine(retriever)
+    # Set max_history to 3 for testing
+    rag_engine = RAGEngine(retriever, max_history=3)
     rag_engine.set_mode("general")
 
-    # List of queries to test the reasoning mode
+    # List of queries to test the memory buffer feature
     queries = [
         # Conceptual Understanding
         "Can you explain the 'Two Sum' problem in simple terms? What is the goal of the problem?",
@@ -207,11 +229,23 @@ if __name__ == "__main__":
         "Why is a hash map (dictionary) a good data structure for solving this problem?",
         "What is the time complexity of the brute-force approach for 'Two Sum'? Can you explain why?",
         "How does using a hash map improve the time complexity? What is the space complexity of this approach?",
+        # Edge Cases
+        "",  # Empty query
+        # Repeated query
+        "What if the input array contains duplicate elements? Will your solution still work?",
+        # Repeated query
+        "What if the input array contains duplicate elements? Will your solution still work?",
+        # Repeated query
+        "What if the input array contains duplicate elements? Will your solution still work?",
+        # Special Characters
+        "What if the input array contains special characters like @#$%^&*()?",
+        # Long Query
+        "What if the input array is extremely large and doesn’t fit into memory? How would you modify your solution?",
     ]
 
-    # Test the reasoning mode with all queries
-    for query in queries:
-        print(f"\nQuery: {query}")
+    # Test the memory buffer feature with all queries
+    for i, query in enumerate(queries):
+        print(f"\nQuery {i + 1}: {query}")
         answer = rag_engine.answer_question(query, k=3)
         print("\nGenerated Answer:")
         print(answer)
@@ -220,11 +254,29 @@ if __name__ == "__main__":
         print("\nConversation History:")
         print(rag_engine.conversation_history.get_context())
 
-    # Simulate stopping the generation after all queries are processed
-    rag_engine.stop()
-    print("\nGeneration stopped by user.")
+    # Test max_history limit
+    print("\nTesting Max History Limit:")
+    print(
+        f"Current History Length: {len(rag_engine.conversation_history.history)}")
+    print("Expected: 3 (since max_history is set to 3)")
 
     # Clear the conversation history and verify it's empty
     rag_engine.conversation_history.clear()
     print("\nConversation History After Clearing:")
     print(rag_engine.conversation_history.get_context())
+    print("Expected: Empty history")
+
+    # Test context usage in prompt generation
+    print("\nTesting Context Usage in Prompt Generation:")
+    rag_engine.conversation_history.add_query(
+        "What is the 'Two Sum' problem?", "The 'Two Sum' problem involves finding two numbers in an array that add up to a target.")
+    rag_engine.conversation_history.add_query(
+        "Why is a hash map useful?", "A hash map allows for O(1) lookups, making it efficient for solving 'Two Sum'.")
+    context = rag_engine.conversation_history.get_context()
+    print("Current Context:")
+    print(context)
+    print("Expected: Context should include the last two queries and responses.")
+
+    # Simulate stopping the generation after all queries are processed
+    rag_engine.stop()
+    print("\nGeneration stopped by user.")
