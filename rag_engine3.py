@@ -21,7 +21,7 @@ class RAGEngine:
         retriever: LeetCodeRetriever,
         ollama_url: str = "http://localhost:11434/api/generate",
         model_name: str = "qwen2.5-coder:1.5b",  # Default model
-        reasoning_model: str = "deepseek-r1:1.5b",  # Reasoning model
+        reasoning_model: str = "deepseek-r1:7b",  # Reasoning model
         mode: str = "general",  # Default mode
         temperature: float = 0.4,
         top_p: float = 0.9,
@@ -147,7 +147,7 @@ class RAGEngine:
         self,
         query: str,
         k: int = 5,
-        min_confidence: float = 0.5
+        min_confidence: float = 0.6
     ) -> str:
         """Answer a question using the enhanced RAG engine."""
         try:
@@ -193,24 +193,55 @@ class RAGEngine:
 
 
 if __name__ == "__main__":
+    # Initialize the RAG engine with the improved reasoning prompt
     retriever = LeetCodeRetriever()
     rag_engine = RAGEngine(retriever)
+    rag_engine.set_mode("reasoning")
 
-    # Test multi-turn conversation
+    # List of queries to test the reasoning mode
     queries = [
-        "Explain the concept of dynamic programming.",
-        "How can I optimize a recursive Fibonacci function using memoization?",
-        "What is the time complexity of the memoized Fibonacci function?",
-        "Can you provide an example of dynamic programming in real life?"
+        # Conceptual Understanding
+        "Can you explain the 'Two Sum' problem in simple terms? What is the goal of the problem?",
+        "Why is it important to ensure that the same element is not used twice in the 'Two Sum' problem?",
+        "What are the key steps to solve the 'Two Sum' problem?",
+        "Why is a hash map (dictionary) a good data structure for solving this problem?",
+        "What is the time complexity of the brute-force approach for 'Two Sum'? Can you explain why?",
+        "How does using a hash map improve the time complexity? What is the space complexity of this approach?",
+
+        #     # Implementation Questions
+        #     "Can you write a brute-force solution for the 'Two Sum' problem? Explain the code step by step.",
+        #     "Can you write an optimized solution using a hash map? Walk me through the code and explain how it works.",
+        #     "How would your solution handle an input where the target is negative?",
+        #     "What if the input array contains duplicate elements? Will your solution still work?",
+
+        #     # Optimization and Alternatives
+        #     "Can you solve the 'Two Sum' problem using a two-pointer approach? Under what conditions would this work?",
+        #     "Why is the two-pointer approach not suitable for an unsorted array?",
+        #     "What are the trade-offs between using a hash map and a two-pointer approach for this problem?",
+        #     "When would you prefer one approach over the other?",
+
+        #     # Variations of the Problem
+        #     "How would you solve the 'Two Sum' problem if the input array is already sorted? Can you provide an optimized solution?",
+        #     "What if the problem allows for multiple pairs that sum to the target? How would you modify your solution to return all valid pairs?",
+        #     "How does the 'Two Sum' problem relate to the 'Three Sum' problem? Can you explain how you would extend your solution to solve 'Three Sum'?",
+
+        #     # Debugging and Testing
+        #     "Suppose your solution is returning incorrect indices. What steps would you take to debug the issue?",
+        #     "What test cases would you create to ensure your solution works correctly? Include edge cases like an empty array, a single-element array, and large inputs.",
+
+        #     # Advanced Questions
+        #     "If the input array is extremely large and doesn’t fit into memory, how would you modify your solution?",
+        #     "How would you handle the problem if the input array is a stream of data instead of a fixed-size array?",
+        #     "Can you think of a real-world scenario where the 'Two Sum' problem might be applicable? How would you adapt your solution for that scenario?",
     ]
 
+    # Test the reasoning mode with all queries
     for query in queries:
         print(f"\nQuery: {query}")
         answer = rag_engine.answer_question(query, k=3)
         print("\nGenerated Answer:")
         print(answer)
 
-    # Simulate stopping the generation after 5 seconds
-    time.sleep(10)
+    # Simulate stopping the generation after all queries are processed
     rag_engine.stop()
     print("\nGeneration stopped by user.")
