@@ -226,13 +226,8 @@ if __name__ == "__main__":
         "Can you explain the 'Two Sum' problem in simple terms? What is the goal of the problem?",
         "Why is it important to ensure that the same element is not used twice in the 'Two Sum' problem?",
         "What are the key steps to solve the 'Two Sum' problem?",
-        "Why is a hash map (dictionary) a good data structure for solving this problem?",
-        "What is the time complexity of the brute-force approach for 'Two Sum'? Can you explain why?",
-        "How does using a hash map improve the time complexity? What is the space complexity of this approach?",
         # Edge Cases
         "",  # Empty query
-        # Repeated query
-        "What if the input array contains duplicate elements? Will your solution still work?",
         # Repeated query
         "What if the input array contains duplicate elements? Will your solution still work?",
         # Repeated query
