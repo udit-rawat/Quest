@@ -159,8 +159,8 @@
                 background-color: var(--query-bg);
                 color: var(--query-text);
                 border-color: var(--border-color);
-                resize: none; /* Disable manual resizing */
-                overflow: hidden; /* Hide scrollbar */
+                resize: none;
+                overflow: hidden;
             }
 
             .form-control:focus {
@@ -192,6 +192,10 @@
                             class="btn btn-outline-light">
                             <i id="theme-icon" class="bi bi-sun"></i>
                         </button>
+                        <button id="clear-history" onclick="clearHistory()"
+                            class="btn btn-outline-light">
+                            <i class="bi bi-trash3"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -203,12 +207,10 @@
                 <div id="messages" class="messages-container"></div>
                 <div class="card-footer bg-transparent border-top-0 p-3">
                     <form id="chat-form" class="d-flex gap-2 align-items-end">
-                        <!-- Wrapper for textarea to allow it to grow -->
                         <div style="flex-grow: 1; position: relative;">
                             <textarea id="query" class="form-control" rows="1"
                                 required></textarea>
                         </div>
-                        <!-- Buttons container to keep them fixed in size -->
                         <div
                             style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                             <button type="submit" id="submit-btn"
@@ -233,12 +235,25 @@
             let currentMode = localStorage.getItem('mode') || 'general';
             let abortController = null;
 
-            // Set initial theme and mode
+            // Initial setup
             document.documentElement.setAttribute('data-theme', currentTheme);
             updateThemeIcon();
             updateMode();
+            loadHistory(); // Load conversation history on startup
 
-            // Function to toggle theme
+            // Function to load conversation history
+            async function loadHistory() {
+                const history = await getHistory();
+                if (history) {
+                    const messages = document.getElementById('messages');
+                    messages.innerHTML = ''; // Clear existing messages
+                    history.forEach(entry => {
+                        addMessage(entry.query, true);
+                        addMessage(entry.response, false);
+                    });
+                }
+            }
+
             function toggleTheme() {
                 const themes = ['light', 'dark', currentMode === 'reasoning' ? 'reasoning' : 'light'];
                 const currentIndex = themes.indexOf(currentTheme);
@@ -248,7 +263,6 @@
                 updateThemeIcon();
             }
 
-            // Function to update theme icon
             function updateThemeIcon() {
                 const icon = document.getElementById('theme-icon');
                 icon.className = currentTheme === 'light' ? 'bi bi-sun' : 
@@ -256,17 +270,37 @@
                                'bi bi-circle-half';
             }
 
-            // Function to toggle mode
-            function toggleMode() {
-                currentMode = currentMode === 'general' ? 'reasoning' : 'general';
-                localStorage.setItem('mode', currentMode);
-                updateMode();
+            async function toggleMode() {
+                const newMode = currentMode === 'general' ? 'reasoning' : 'general';
+                
+                try {
+                    const response = await fetch('/set_mode', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ mode: newMode })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to set mode');
+                    }
+                    
+                    currentMode = newMode;
+                    localStorage.setItem('mode', currentMode);
+                    updateMode();
+                    
+                } catch (error) {
+                    console.error('Failed to set mode:', error);
+                }
             }
 
-            // Function to update mode
             function updateMode() {
-                document.getElementById('mode-text').textContent = currentMode === 'general' ? 'Normal' : 'Reasoning';
-                document.getElementById('mode-icon').className = currentMode === 'general' ? 'bi bi-braces-asterisk' : 'bi bi-tsunami';
+                document.getElementById('mode-text').textContent = 
+                    currentMode === 'general' ? 'Normal' : 'Reasoning';
+                document.getElementById('mode-icon').className = 
+                    currentMode === 'general' ? 'bi bi-braces-asterisk' : 'bi bi-tsunami';
                 
                 if (currentMode === 'reasoning') {
                     document.documentElement.setAttribute('data-theme', 'reasoning');
@@ -275,60 +309,55 @@
                 }
             }
 
-            // Function to add a message to the chat
             function addMessage(content, isUser = false) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
-                
-                if (isUser) {
-                    messageDiv.textContent = content;
-                } else {
-                    messageDiv.innerHTML = md.render(content);
-                    messageDiv.querySelectorAll('pre code').forEach(block => {
-                        hljs.highlightElement(block);
-
-                        // Add a copy button to each code block
-                        const copyButton = document.createElement('button');
-                        copyButton.className = 'copy-button';
-                        copyButton.textContent = 'Copy';
-                        copyButton.onclick = () => copyToClipboard(block);
-                        block.parentElement.style.position = 'relative';
-                        block.parentElement.appendChild(copyButton);
-                    });
-                }
-                
-                document.getElementById('messages').appendChild(messageDiv);
-                messageDiv.scrollIntoView({ behavior: 'smooth' });
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+            
+            if (isUser) {
+                messageDiv.textContent = content;
+            } else {
+                messageDiv.innerHTML = md.render(content);
+                messageDiv.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block);
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'copy-button';
+                    copyButton.innerHTML = '<i class="bi bi-copy"></i>'; // Use Bootstrap Icons class
+                    copyButton.onclick = () => copyToClipboard(block);
+                    block.parentElement.style.position = 'relative';
+                    block.parentElement.appendChild(copyButton);
+                });
             }
+            
+            document.getElementById('messages').appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: 'smooth' });
+        }
 
             function copyToClipboard(codeBlock) {
-                const text = codeBlock.textContent;
-                if (navigator.clipboard) {
-                    // Use the modern clipboard API
-                    navigator.clipboard.writeText(text)
-                        .then(() => {
-                            alert('Code copied to clipboard!');
-                        })
-                        .catch(err => {
-                            console.error('Failed to copy text: ', err);
-                        });
-                } else {
-                    // Fallback for older browsers
-                    const textarea = document.createElement('textarea');
-                    textarea.value = text;
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    try {
-                        document.execCommand('copy');
-                        alert('Code copied to clipboard!');
-                    } catch (err) {
+            const text = codeBlock.textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        // Optionally, you can add a visual feedback here
+                        console.log('Code copied to clipboard!');
+                    })
+                    .catch(err => {
                         console.error('Failed to copy text: ', err);
-                    }
-                    document.body.removeChild(textarea);
+                    });
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    console.log('Code copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
                 }
+                document.body.removeChild(textarea);
             }
+        }
 
-            // Function to handle form submission
             async function handleSubmit(event) {
                 event.preventDefault();
                 
@@ -340,7 +369,7 @@
                 
                 submitBtn.disabled = true;
                 stopBtn.style.display = 'inline-flex';
-                addMessage(query, true); // Add user's message to the chat
+                addMessage(query, true);
                 
                 const loadingMessage = document.createElement('div');
                 loadingMessage.className = 'message assistant-message';
@@ -361,97 +390,117 @@
                         signal: abortController.signal
                     });
 
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    
-                    const reader = response.body.getReader();
-                    let accumulatedResponse = '';
-                    
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        
-                        const chunk = new TextDecoder().decode(value);
-                        accumulatedResponse += chunk;
-                        
-                        // Update the loading message with the accumulated response
-                        loadingMessage.innerHTML = md.render(accumulatedResponse);
-                        
-                        // Highlight code blocks
-                        loadingMessage.querySelectorAll('pre code').forEach(block => {
-                            hljs.highlightElement(block);
-                        });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Network response was not ok');
                     }
                     
-                    // Remove the loading animation once the response is complete
-                    loadingMessage.classList.remove('loading');
+                    const data = await response.json();
+                    loadingMessage.innerHTML = md.render(data.response);
+                    
+                    loadingMessage.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block);
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'copy-button';
+                    copyButton.innerHTML = '<i class="bi bi-copy"></i>'; // Use Bootstrap Icons class
+                    copyButton.onclick = () => copyToClipboard(block);
+                    block.parentElement.style.position = 'relative';
+                    block.parentElement.appendChild(copyButton);
+                });
+                    
                 } catch (error) {
                     if (error.name === 'AbortError') {
-                        // Handle the abort error specifically
-                        console.log('Request aborted by the user');
                         loadingMessage.innerHTML = 'Generation stopped by the user.';
                     } else {
-                        // Handle other errors
                         loadingMessage.innerHTML = `Error: ${error.message}`;
                     }
                 } finally {
                     submitBtn.disabled = false;
                     stopBtn.style.display = 'none';
                     abortController = null;
-
-                    // Clear the query textarea after submission
                     document.getElementById('query').value = '';
-                    autoExpand(document.getElementById('query')); // Reset the height of the textarea
+                    autoExpand(document.getElementById('query'));
                 }
             }
 
-            // Function to stop the generation process
-            function stopGeneration() {
+            async function stopGeneration() {
                 if (abortController) {
-                    // Abort the ongoing request
                     abortController.abort();
-
-                    // Send a signal to the backend to stop generation
-                    fetch('/stop', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ stop: true })
-                    })
-                    .then(response => {
+                    
+                    try {
+                        const response = await fetch('/stop', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
                         if (!response.ok) {
-                            throw new Error('Failed to send stop signal to the backend');
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || 'Failed to send stop signal');
                         }
-                        console.log('Stop signal sent successfully');
-                    })
-                    .catch(err => {
-                        console.error('Failed to send stop signal:', err);
-                    });
-
-                    // Update the UI
-                    document.getElementById('stop-btn').style.display = 'none'; // Hide the Stop button
-                    document.getElementById('submit-btn').disabled = false; // Re-enable the Submit button
-
-                    // Optionally, display a message to the user
+                        
+                    } catch (error) {
+                        console.error('Failed to send stop signal:', error);
+                    }
+                    
+                    document.getElementById('stop-btn').style.display = 'none';
+                    document.getElementById('submit-btn').disabled = false;
+                    
                     const loadingMessage = document.querySelector('.loading');
                     if (loadingMessage) {
                         loadingMessage.innerHTML = 'Generation stopped by the user.';
                     }
                 }
             }
-            // Function to auto-expand the textarea based on its content
-            function autoExpand(textarea) {
-                textarea.style.height = 'auto'; // Reset height to auto to recalculate
-                textarea.style.height = textarea.scrollHeight + 'px'; // Set height to scrollHeight
+
+            async function clearHistory() {
+                try {
+                    const response = await fetch('/clear_history', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to clear history');
+                    }
+                    
+                    // Clear messages from UI
+                    document.getElementById('messages').innerHTML = '';
+                    
+                } catch (error) {
+                    console.error('Failed to clear history:', error);
+                }
             }
 
-            // Attach event listener to the form
+            async function getHistory() {
+                try {
+                    const response = await fetch('/get_history');
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to get history');
+                    }
+                    
+                    const data = await response.json();
+                    return data.history;
+                    
+                } catch (error) {
+                    console.error('Failed to get history:', error);
+                    return null;
+                }
+            }
+
+            function autoExpand(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
+
+            // Event Listeners
             document.getElementById('chat-form').addEventListener('submit', handleSubmit);
-
-            // Attach event listener to the stop button
             document.getElementById('stop-btn').addEventListener('click', stopGeneration);
-
-            // Allow Shift+Enter for new lines in the query input
             document.getElementById('query').addEventListener('keydown', (event) => {
                 if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault();
@@ -459,11 +508,8 @@
                 }
             });
 
-            // Attach event listener to the textarea for input events
             const queryTextarea = document.getElementById('query');
             queryTextarea.addEventListener('input', () => autoExpand(queryTextarea));
-
-            // Initialize the textarea height on page load
             autoExpand(queryTextarea);
         </script>
     </body>
