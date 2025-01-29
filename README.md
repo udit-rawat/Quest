@@ -2,7 +2,7 @@
 
 **Quest** is a Retrieval-Augmented Generation (RAG) engine designed to assist with solving and explaining Data Structures and Algorithms (DSA) problems. It leverages a combination of retrieval-based methods and generative models to provide accurate and context-aware solutions to coding problems, explanations of concepts, and metadata about LeetCode-style questions.
 
----
+![Quest](templates/Quest.png)
 
 ## Features
 
@@ -12,6 +12,16 @@
 - **Efficient Search**: Uses FAISS and HNSW for fast and accurate similarity search in high-dimensional spaces.
 - **Customizable**: Supports different models and configurations for retrieval and generation.
 - **Pre-Generated Solutions**: Includes **1800+ solutions in JSON format**, created using the `qwen2.5-coder:1.5b` model on a local machine.
+- **Optimized Inference Speed**: Reduced query retrieval time from 1 minute to 15 seconds and reasoning model time from 20 minutes to under 4 minutes.
+- **Dynamic Prompt Switching**: Implements dynamic prompt switching for Qwen and Deepseek models to prevent infinite reasoning loops.
+- **Unknown Query Handling**: Switches to model’s own inference for queries with confidence below 0.6 for better accuracy.
+- **HNSW Indexing**: Fine-tuned HNSW parameters for faster and more relevant query retrieval.
+- **Memory Buffer**: Retains past interactions for more contextually accurate responses over multiple queries.
+- **Dataset Generation**: Created an on-device dataset of over 1850 coding questions JSON, enriched with metadata.
+- **Reasoning Model Integration**: Integrated Deepseekr1 7B for complex problem-solving with optimized prompt templates.
+- **Frontend Interface**: Built with Flask and Bootstrap, featuring a clean and responsive design with interactive elements.
+- **Search and Query Optimization**: Optimized query engine with efficient indexing and metadata-based retrieval.
+- **Code Quality**: Well-structured code, easy to understand, extend, and deploy, hosted on GitHub for public access.
 
 ---
 
